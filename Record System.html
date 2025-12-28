@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>EZ TECH | Record System</title>
+
+<style>
+:root{
+  --bg:#020617;
+  --panel:#0f172a;
+  --card:#162235;
+  --border:rgba(148,163,184,.18);
+  --text:#e5e7eb;
+  --blue:#38bdf8;
+  --orange:#fb923c;
+  --green:#4ade80;
+  --red:#fecaca;
+  
+  /* Filter Button Colors */
+  --btn-inactive: #1e293b;
+  --btn-active-all: #f59e0b;
+  --btn-active-open: #ef4444;
+  --btn-active-close: #10b981;
+}
+
+body{
+  margin:0;
+  font-family:"Segoe UI","Microsoft JhengHei";
+  background:radial-gradient(circle at top,#1e293b 0%,#020617 70%);
+  color:var(--text);
+}
+
+.container{
+  width:95%;
+  margin:30px auto;
+  padding:30px 36px 36px;
+  background:radial-gradient(circle at top,#162235,#020617 75%);
+  border-radius:24px;
+  border:1px solid var(--border);
+}
+
+/* ===== Header ===== */
+.header{
+  display:flex;
+  align-items:center;
+  margin-bottom:26px;
+  gap: 15px;
+}
+
+.header h1{
+  flex:1;
+  font-size:32px;
+  letter-spacing:1.5px;
+  color: var(--text); 
+  text-shadow: 0 0 10px rgba(255,255,255,0.1);
+  margin:0;
+}
+
+/* 按鈕群組 */
+.btn-group {
+  display: flex;
+  gap: 5px;
+  margin-right: 20px;
+  background: #0f172a;
+  padding: 5px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.filter-btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.filter-btn.active[data-mode="ALL"] { background: var(--btn-active-all); color: #000; box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+.filter-btn.active[data-mode="OPEN"] { background: var(--btn-active-open); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+.filter-btn.active[data-mode="CLOSE"] { background: var(--btn-active-close); color: #fff; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+
+.filter-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.05);
+  color: #94a3b8;
+}
+
+.btn{
+  border-radius:14px;
+  padding:10px 26px;
+  font-size:18px;
+  font-weight:600;
+  cursor:pointer;
+  border:1px solid var(--border);
+  background:linear-gradient(180deg,#162235,#0f1c2f);
+  color:var(--text);
+}
+.btn-blue{color:var(--blue)}
+.btn-red{color:var(--red)}
+
+.btn:hover{
+  box-shadow:0 0 18px rgba(56,189,248,.4);
+}
+
+/* ===== Table ===== */
+.table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 14px;
+}
+
+/* ▼▼▼ 修改重點：這裡調整成跟 New Event Record 一樣的樣式 ▼▼▼ */
+.table thead th{
+  font-size: 16px;       /* 原本是 20px，改為 16px */
+  font-weight: bold;     /* 原本是 600，改為 bold */
+  color: var(--orange);  /* 維持 #fb923c */
+  text-align: left;
+  padding: 0 10px 6px;
+}
+/* ▲▲▲ 修改結束 ▲▲▲ */
+
+.table tbody tr{
+  background:linear-gradient(180deg,#162235,#0f1c2f);
+  border-radius:16px;
+  box-shadow:0 12px 28px rgba(0,0,0,.45);
+  transition: transform 0.2s;
+}
+.table tbody tr:hover{
+  transform: translateY(-2px);
+}
+
+.table td{
+  padding:12px 10px;
+}
+
+.cell input{
+  width:100%;
+  padding:10px 12px;
+  font-size:20px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#020617;
+  color:var(--blue);
+}
+
+.status-CLOSE input { color: #64748b; }
+
+.row-btn{
+  border-radius:12px;
+  padding:6px 18px;
+  font-size:18px;
+  font-weight:600;
+  border:1px solid var(--border);
+  background:linear-gradient(180deg,#162235,#0f1c2f);
+  color:var(--blue);
+  cursor:pointer;
+}
+.row-btn:hover{
+  box-shadow:0 0 14px rgba(56,189,248,.45);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>Event List</h1>
+    
+    <div class="btn-group">
+      <button class="filter-btn" data-mode="ALL" onclick="changeFilter('ALL')">All</button>
+      <button class="filter-btn active" data-mode="OPEN" onclick="changeFilter('OPEN')">Open</button>
+      <button class="filter-btn" data-mode="CLOSE" onclick="changeFilter('CLOSE')">Close</button>
+    </div>
+
+    <button class="btn btn-blue" onclick="openAdd()">Add</button>
+    <button class="btn btn-red" onclick="exitPage()">Exit</button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:90px;"></th>
+        <th style="width:150px;">Date</th>
+        <th style="width:160px;">Customer</th>
+        <th style="width:160px;">Machine</th>
+        <th>Event</th>
+        <th style="width:90px;"></th>
+      </tr>
+    </thead>
+    <tbody id="eventBody">
+      <tr>
+        <td colspan="6" style="padding:20px;color:#94a3b8;text-align:center;">Loading...</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
+
+let currentFilter = 'OPEN';
+
+loadList(currentFilter);
+
+function changeFilter(mode){
+  if(currentFilter === mode) return;
+  
+  currentFilter = mode;
+  
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if(btn.dataset.mode === mode) btn.classList.add('active');
+  });
+
+  loadList(mode);
+}
+
+function loadList(filter){
+  const tbody = document.getElementById('eventBody');
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6" style="padding:40px;color:#94a3b8;text-align:center;">
+        Loading ${filter} events...
+      </td>
+    </tr>`;
+
+  fetch(`${API_URL}?mode=getList&filter=${filter}`)
+  .then(r => r.json())
+  .then(res => {
+    if(res.result !== 'OK'){
+      tbody.innerHTML = `<tr><td colspan="6" style="color:red;text-align:center;">${res.message}</td></tr>`;
+      return;
+    }
+    render(res.list);
+  })
+  .catch(err => {
+    tbody.innerHTML = `<tr><td colspan="6" style="color:red;text-align:center;">Connection Error</td></tr>`;
+    console.error(err);
+  });
+}
+
+function render(list){
+  const tbody = document.getElementById('eventBody');
+  tbody.innerHTML = '';
+
+  if(!list || list.length === 0){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="padding:40px;color:#94a3b8;text-align:center;">
+          No data found for ${currentFilter}
+        </td>
+      </tr>`;
+    return;
+  }
+
+  list.forEach(e => {
+    const tr = document.createElement('tr');
+    const statusClass = (e.Status === 'CLOSE') ? 'status-CLOSE' : '';
+    
+    tr.innerHTML = `
+      <td>
+        <button class="row-btn" onclick="openDetail('${e.ID}')">Detail</button>
+      </td>
+      <td class="cell ${statusClass}"><input value="${e.EventDate}" readonly></td>
+      <td class="cell ${statusClass}"><input value="${e.Customer}" readonly></td>
+      <td class="cell ${statusClass}"><input value="${e.Machine}" readonly></td>
+      <td class="cell ${statusClass}"><input value="${e.EventTitle}" readonly></td>
+      <td>
+        <button class="row-btn" onclick="openLog('${e.ID}')">Add</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openAdd(){
+  window.open('New Event Record.html?mode=new','_blank','width=1200,height=800');
+}
+
+function openLog(id){
+  window.open('New Event Log.html?mode=add&eventId=' + id,'_blank','width=1200,height=800');
+}
+
+function openDetail(id){
+  window.open('Event Detail.html?eventId=' + id,'_blank','width=1400,height=900');
+}
+
+function exitPage(){
+  location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Event Search</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Segoe UI","Microsoft JhengHei";
+    background: radial-gradient(circle at top, #1c1f24, #0f1115);
+    color:#e6e6e6;
+}
+.container{
+    width:95%;
+    margin:30px auto;
+    padding:25px;
+    border:1px solid #3a3f46;
+    background:linear-gradient(180deg,#1a1d22,#121417);
+}
+h2{
+    text-align:center;
+    color:#ff66ff;
+    font-size:32px;
+}
+label{color:#ffb347;font-size:18px;}
+input,select{
+    width:100%;
+    font-size:20px;
+    padding:6px;
+    border:1px solid #ff6a00;
+    background:#0f1115;
+    color:#4aa3ff;
+}
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 2fr;
+    gap:15px;
+}
+.btn{
+    font-size:22px;
+    padding:8px 24px;
+    border:1px solid #6a6f78;
+    background:linear-gradient(#2a2f36,#1a1e24);
+    cursor:pointer;
+    margin-right:10px;
+}
+.btn-blue{color:#4aa3ff;}
+.btn-orange{color:#ff9f1a;}
+.btn-red{color:#ff4c4c;}
+.result{
+    margin-top:25px;
+    border-top:1px solid #555;
+    padding-top:15px;
+}
+.event{
+    border-bottom:1px solid #555;
+    padding:10px 0;
+}
+.event-title{
+    color:#4aa3ff;
+    font-size:20px;
+    margin-bottom:6px;
+}
+.log{
+    margin-left:20px;
+    color:#ccc;
+    white-space:pre-wrap;
+    border-left:3px solid #333;
+    padding-left:10px;
+    margin-bottom:6px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h2>Event Search</h2>
+
+<div class="row">
+    <div>
+        <label>From Date</label>
+        <input id="from" type="date">
+    </div>
+    <div>
+        <label>To Date</label>
+        <input id="to" type="date">
+    </div>
+    <div>
+        <label>Machine</label>
+        <select id="machine">
+            <option value="">ALL</option>
+            <option>ATFSMA1</option>
+            <option>ATPEOA1</option>
+            <option>OTHER</option>
+        </select>
+    </div>
+    <div>
+        <label>Keyword</label>
+        <input id="kw" placeholder="Event / Log keyword">
+    </div>
+</div>
+
+<br>
+<button class="btn btn-blue" onclick="search()">To Search</button>
+<button class="btn btn-orange" onclick="search('all')">All</button>
+<button class="btn btn-orange" onclick="search('unfinish')">Unfinish</button>
+<button class="btn btn-red" onclick="window.close()">Exit</button>
+
+<div id="result" class="result">No Result</div>
+</div>
+
+<script>
+const events = JSON.parse(localStorage.getItem('AllEventList')||'[]');
+const logs   = JSON.parse(localStorage.getItem('EventLogList')||'[]');
+
+const fromInput = document.getElementById('from');
+const toInput   = document.getElementById('to');
+const machineEl = document.getElementById('machine');
+const kwInput   = document.getElementById('kw');
+const result    = document.getElementById('result');
+
+function toDate(d){
+    if(!d) return null;
+    return new Date(d);
+}
+
+function showAlert(msg){
+    alert(msg);   // 行為刻意做成 Access 風格
+}
+
+function search(mode){
+    const fromVal = fromInput.value;
+    const toVal   = toInput.value;
+    const m       = machineEl.value;
+    const kw      = kwInput.value.trim().toLowerCase();
+
+    const hasDate = fromVal || toVal;
+    const hasCond = hasDate || m || kw || mode;
+
+    /* ===== 條件驗證（核心修正點） ===== */
+    if(!hasCond){
+        showAlert('請選擇查詢條件');
+        return;
+    }
+
+    if(hasDate && (!fromVal || !toVal)){
+        showAlert('日期查詢請同時設定 From 與 To');
+        return;
+    }
+
+    const from = toDate(fromVal);
+    const to   = toDate(toVal);
+
+    let html = '';
+
+    events.forEach(e=>{
+        if(mode==='unfinish' && e.status!=='unfinish') return;
+        if(m && e.machine!==m) return;
+
+        const ed = toDate(e.date.replace(/\//g,'-'));
+        if(from && ed < from) return;
+        if(to && ed > to) return;
+
+        const eventMatch =
+            !kw ||
+            e.title?.toLowerCase().includes(kw) ||
+            e.process?.toLowerCase().includes(kw);
+
+        const matchedLogs = logs
+            .filter(l=>l.eventId===e.id)
+            .filter(l=>!kw || l.process.toLowerCase().includes(kw));
+
+        if(!eventMatch && matchedLogs.length===0) return;
+
+        html += `<div class="event">
+            <div class="event-title">
+                ${e.date} ｜ ${e.machine} ｜ ${e.title}
+                <span style="float:right;color:#ff9f1a;">
+                    ${e.status || ''}
+                </span>
+            </div>
+        `;
+
+        if(e.process){
+            html += `<div class="log">${e.process}</div>`;
+        }
+
+        matchedLogs
+            .sort((a,b)=>b.logDate.localeCompare(a.logDate))
+            .forEach(l=>{
+                html += `<div class="log">
+${l.logDate} / ${l.shift} / ${l.engineer}
+${l.process}
+</div>`;
+            });
+
+        html += `</div>`;
+    });
+
+    result.innerHTML = html || 'No Result';
+}
+</script>
+</body>
+</html>

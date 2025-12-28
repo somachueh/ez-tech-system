@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Daily Report</title>
+
+<style>
+body{
+    font-family:"Times New Roman","Microsoft JhengHei";
+    background:#ffffff;
+    color:#000;
+    margin:40px;
+}
+
+.header{
+    text-align:center;
+    font-size:36px;
+    color:#2a2aa5;
+    border-bottom:2px solid green;
+    padding-bottom:10px;
+    margin-bottom:30px;
+}
+
+.day-block{
+    margin-bottom:40px;
+}
+
+.day-title{
+    font-size:22px;
+    color:#d100ff;
+    margin-bottom:10px;
+    border-bottom:1px solid green;
+    padding-bottom:5px;
+}
+
+.event-header{
+    display:flex;
+    font-size:18px;
+    margin-top:15px;
+    border-bottom:1px solid #00aaff;
+    padding-bottom:4px;
+}
+
+.event-machine{
+    width:120px;
+    color:#ff6600;
+    font-weight:bold;
+}
+
+.event-title{
+    flex:1;
+    color:#008000;
+}
+
+.event-status{
+    width:100px;
+    text-align:right;
+    color:#888;
+}
+
+.log{
+    margin-left:40px;
+    margin-top:8px;
+    font-size:16px;
+}
+
+.log-head{
+    color:#ff6600;
+    margin-bottom:4px;
+}
+
+.log-process{
+    color:#0033cc;
+    white-space:pre-wrap;
+}
+
+hr{
+    margin:20px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    Daily Report
+</div>
+
+<div id="report"></div>
+
+<script>
+const events = JSON.parse(localStorage.getItem('AllEventList')||'[]');
+const logs   = JSON.parse(localStorage.getItem('EventLogList')||'[]');
+const report = document.getElementById('report');
+
+/* ===== 依日期分組 ===== */
+const byDate = {};
+events.forEach(e=>{
+    if(!byDate[e.date]) byDate[e.date]=[];
+    byDate[e.date].push(e);
+});
+
+/* ===== 日期排序（舊 → 新，可自行反轉） ===== */
+Object.keys(byDate).sort().forEach(date=>{
+    const dayDiv=document.createElement('div');
+    dayDiv.className='day-block';
+
+    dayDiv.innerHTML=`<div class="day-title">${date}</div>`;
+
+    byDate[date].forEach(e=>{
+        const evDiv=document.createElement('div');
+
+        evDiv.innerHTML=`
+            <div class="event-header">
+                <div class="event-machine">${e.machine||''}</div>
+                <div class="event-title">${e.title||''}</div>
+                <div class="event-status">${e.status==='unfinish'?'未結案':'結案'}</div>
+            </div>
+        `;
+
+        /* 初始紀錄 */
+        if(e.process){
+            evDiv.innerHTML+=`
+                <div class="log">
+                    <div class="log-head">
+                        ${e.date} / ${e.shift||''} / ${e.engineer||''}
+                    </div>
+                    <div class="log-process">${e.process}</div>
+                </div>
+            `;
+        }
+
+        /* 後續 Log（新在上） */
+        logs
+          .filter(l=>l.eventId===e.id)
+          .sort((a,b)=>{
+              if(a.logDate===b.logDate){
+                  return b.logId.localeCompare(a.logId);
+              }
+              return b.logDate.localeCompare(a.logDate);
+          })
+          .forEach(l=>{
+            evDiv.innerHTML+=`
+                <div class="log">
+                    <div class="log-head">
+                        ${l.logDate} / ${l.shift} / ${l.engineer}
+                    </div>
+                    <div class="log-process">${l.process}</div>
+                </div>
+            `;
+          });
+
+        dayDiv.appendChild(evDiv);
+    });
+
+    report.appendChild(dayDiv);
+});
+</script>
+
+</body>
+</html>
