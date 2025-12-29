@@ -2,269 +2,92 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>New Event Log</title>
+<title>Add Log</title>
 <style>
-  /* === 核心樣式：維持 New Event Record 的暗黑科技風 === */
-  body {
-    margin: 0;
-    padding: 20px;
-    font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
-    background: radial-gradient(circle at top, #1e293b, #020617);
-    color: #e5e7eb;
-    height: 100vh;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* 標題改用藍色系區分，或者維持綠色皆可，這裡維持風格統一用綠色 */
-  h1 {
-    text-align: center;
-    color: #38bdf8; /* 為了區分這是 Log 頁面，我稍微改成亮藍色，你若喜歡綠色可改回 #4ade80 */
-    margin: 0 0 20px 0;
-    font-size: 32px;
-    text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
-  }
-
-  /* === 排版系統：Dashboard 架構 === */
-  .layout-grid {
-    display: grid;
-    /* 左側(260px) | 中間(自動) | 右側(140px) */
-    grid-template-columns: 260px 1fr 140px; 
-    grid-template-rows: 1fr; /* 只有一列，直接填滿高度 */
-    gap: 15px;
-    flex: 1;
-    min-height: 0;
-  }
-
-  /* 通用欄位容器 */
-  .field-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px; /* 增加一點間距 */
-  }
-
-  label {
-    display: block;
-    margin-bottom: 8px;
-    color: #fb923c; /* Orange */
-    font-size: 16px;
-    font-weight: bold;
-  }
-
+  body { margin:0; padding:20px; font-family:"Segoe UI"; background:#020617; color:#e5e7eb; height:100vh; display:flex; flex-direction:column; }
+  
   /* 輸入框樣式 */
-  input, select, textarea {
-    padding: 12px;
+  input, textarea { 
+    width:100%; 
+    padding:10px; 
+    margin-bottom:15px; 
+    background:#0f172a; 
+    border:1px solid #334155; 
+    color:#38bdf8; 
+    border-radius:8px; 
+    box-sizing:border-box;
     font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    background: #020617;
-    color: #38bdf8;
-    width: 100%;
-    box-sizing: border-box;
+    font-family: inherit;
     outline: none;
-    transition: border 0.3s;
   }
+  
+  /* 日期選擇器 */
+  input[type="date"] { color-scheme: dark; }
 
-  /* 唯讀欄位特別樣式 (Event ID) */
-  input[readonly] {
-    background: #0f172a;
-    color: #94a3b8; /* 灰色字體表示唯讀 */
-    border-color: rgba(148, 163, 184, 0.1);
-    cursor: default;
-  }
-
-  input:focus, textarea:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
-  }
-
-  /* === 區塊設定 === */
-
-  /* 左側邊欄 */
-  .left-sidebar {
-    grid-column: 1 / 2;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* 中間主要描述區 (佔滿整個中間高度) */
-  .center-main-area {
-    grid-column: 2 / 3;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .center-main-area textarea {
-    flex: 1; /* 高度自動填滿 */
-    resize: none;
-    font-size: 18px;
-    line-height: 1.6;
-    background: #020617;
-  }
-
-  /* 右側附件區 */
-  .right-sidebar {
-    grid-column: 3 / 4;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .appendix-box {
-    height: 80px;
-    border: 1px dashed rgba(148, 163, 184, 0.4);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #64748b;
-    font-size: 12px;
-    background: rgba(2, 6, 23, 0.5);
-  }
-
-  /* 按鈕區 - 置於左側底部 */
-  .btn-container {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .btn {
-    width: 100%;
-    padding: 15px;
-    font-size: 20px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.1s;
-  }
-  .btn:active { transform: scale(0.98); }
-
-  /* 維持原本 New Event Log 的藍色按鈕風格，但樣式更現代 */
-  .btn-save { 
-    background: #0ea5e9; /* Sky Blue */
-    color: #fff; 
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-  } 
-  .btn-save:hover { background: #0284c7; }
-
-  .btn-exit { 
-    background: #1e293b; 
-    color: #94a3b8; 
-    border: 1px solid #334155; 
-  }
-
+  label { color:#fb923c; font-weight:bold; display:block; margin-bottom:5px; }
+  
+  button { width:100%; padding:15px; font-weight:bold; cursor:pointer; border-radius:10px; border:none; margin-top:10px; font-size: 16px; }
+  
+  .btn-save { background: #38bdf8; color: #000; }
+  .btn-exit { background: #1e293b; color: #fff; border: 1px solid #334155; }
 </style>
 </head>
 <body>
+  
+  <label>Event ID</label>
+  <input id="eid" readonly style="color:#64748b; border: 1px dashed #334155;">
+  
+  <label>Date</label>
+  <input type="date" id="logDate">
 
-  <h1>New Event Log</h1>
+  <label>ENG (Engineer)</label>
+  <input id="eng">
 
-  <div class="layout-grid">
-    
-    <div class="left-sidebar">
-      
-      <div class="field-group">
-        <label>Event ID</label>
-        <input id="eventId" readonly placeholder="Loading...">
-      </div>
+  <label>Action / Result</label>
+  <textarea id="action" style="height:250px"></textarea>
 
-      <div class="field-group">
-        <label>Engineer *</label>
-        <input id="engineer" placeholder="Enter name">
-      </div>
-
-      <div class="btn-container">
-        <button class="btn btn-save" onclick="saveLog()">Save Log</button>
-        <button class="btn btn-exit" onclick="window.close()">Exit</button>
-      </div>
-    </div>
-
-    <div class="center-main-area">
-      <label>Process Describe *</label>
-      <textarea id="processDescribe" placeholder="Please describe the maintenance process..."></textarea>
-    </div>
-
-    <div class="right-sidebar">
-      <label>Appendix</label>
-      <div class="appendix-box">File 1</div>
-      <div class="appendix-box">File 2</div>
-      <div class="appendix-box">File 3</div>
-      <div class="appendix-box">File 4</div>
-    </div>
-
-  </div>
+  <button class="btn-save" onclick="save()">Save Log</button>
+  <button class="btn-exit" onclick="window.close()">Exit</button>
 
 <script>
-// GAS 網址
 const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
+const p = new URLSearchParams(location.search);
+document.getElementById('eid').value = p.get('eventId');
 
-/* 初始化：從 URL 取得 Event ID */
-window.onload = function() {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('eventId');
-    if(id){
-        document.getElementById('eventId').value = id;
-    } else {
-        alert('❌ Error: Missing Event ID in URL');
-        document.getElementById('eventId').value = 'ERROR';
+// 初始化日期為今天
+document.getElementById('logDate').value = new Date().toISOString().slice(0,10);
+
+function save(){
+  const dateInput = document.getElementById('logDate').value;
+
+  const pl = {
+    mode: 'addLog',
+    EventID: document.getElementById('eid').value,
+    LogDate: dateInput.replace(/-/g, '/'), // 傳送格式化日期
+    ENG: document.getElementById('eng').value,
+    Action: document.getElementById('action').value
+  };
+  
+  if(!pl.LogDate || !pl.ENG || !pl.Action) return alert('❌ Fill all fields');
+  
+  const btn = document.querySelector('.btn-save');
+  btn.innerText = 'Saving...'; btn.disabled = true;
+
+  fetch(API_URL, {method:'POST', body:JSON.stringify(pl)})
+  .then(r=>r.json()).then(res=>{
+    if(res.result==='OK'){ 
+      alert('✅ Log Added'); 
+      window.close(); 
+    } else { 
+      alert('Error: ' + res.message); 
+      btn.innerText = 'Save Log'; btn.disabled = false;
     }
-};
-
-/* Save Log */
-function saveLog(){
-    const eventId = document.getElementById('eventId').value;
-    const engineer = document.getElementById('engineer').value;
-    const processDescribe = document.getElementById('processDescribe').value;
-
-    if(!eventId || eventId === 'ERROR'){
-        alert('❌ Invalid Event ID');
-        return;
-    }
-    if(!engineer.trim() || !processDescribe.trim()){
-        alert('❌ Engineer and Process Describe are required');
-        return;
-    }
-
-    // 鎖定按鈕避免重複發送
-    const btn = document.querySelector('.btn-save');
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = 'Saving...';
-
-    const payload = {
-        mode: 'addLog',
-        EventID: eventId,
-        Engineer: engineer.trim(),
-        ProcessDescribe: processDescribe.trim()
-    };
-
-    fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(res => {
-        if(res.result === 'OK'){
-            alert('✅ Log Saved!');
-            window.close(); // 成功後關閉視窗
-        } else {
-            alert('Save failed: ' + res.message);
-            btn.disabled = false;
-            btn.innerText = originalText;
-        }
-    })
-    .catch(err => {
-        alert('GAS connection error');
-        console.error(err);
-        btn.disabled = false;
-        btn.innerText = originalText;
-    });
+  })
+  .catch(err => {
+    alert('Connection Error');
+    btn.innerText = 'Save Log'; btn.disabled = false;
+  });
 }
 </script>
-
 </body>
 </html>

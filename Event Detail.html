@@ -4,462 +4,370 @@
 <meta charset="UTF-8">
 <title>Event Detail</title>
 <style>
-  :root {
-    --bg: #020617;
-    --panel: #0f172a;
-    --border: #334155;
-    --text-main: #e2e8f0;
-    --text-blue: #38bdf8;
-    --text-green: #4ade80;
-    --text-orange: #fb923c;
-    --btn-edit: #eab308; /* Yellow */
-    --btn-save: #22c55e; /* Green */
-    
-    /* 狀態按鈕顏色 */
-    --status-open-bg: #ef4444; /* 紅色 */
-    --status-open-text: #ffffff;
-    --status-close-bg: #22c55e; /* 綠色 */
-    --status-close-text: #ffffff;
-  }
+:root { 
+  --bg:#020617; 
+  --panel:#0f172a; 
+  --text:#e5e7eb; 
+  --orange:#fb923c; 
+  --blue:#38bdf8; 
+  --green:#4ade80;
+  --yellow:#eab308;
+  --line-color: #334155;
+  --btn-log-save: #38bdf8;
+}
+body { margin:0; padding:20px; font-family:"Segoe UI"; background:var(--bg); color:var(--text); display:flex; flex-direction:column; gap:20px; height:100vh; box-sizing:border-box; }
 
-  body {
-    margin: 0;
-    padding: 20px;
-    font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
-    background: var(--bg);
-    color: var(--text-main);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    height: 100vh;
-    box-sizing: border-box;
-  }
+/* === Master Info Area === */
+.master-info {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;
+  padding: 20px; background: var(--panel); border-radius: 12px; border:1px solid #334155;
+}
 
-  /* === Top Area: Master Event Info === */
-  .master-info {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    padding: 20px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  }
+.info-group { display: flex; flex-direction: column; }
+.info-group label { color: var(--orange); font-size: 12px; margin-bottom: 5px; }
 
-  .info-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .info-group label {
-    color: var(--text-orange);
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
-  
-  .info-group div {
-    color: var(--text-green);
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 5px;
-  }
+/* Editable Fields Style */
+.editable-field {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 1px solid var(--line-color);
+  color: var(--blue);
+  font-weight: bold;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 0;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
 
-  .full-width { grid-column: span 4; }
+/* 編輯模式下的樣式 */
+.editable-field.editing {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-bottom: 1px solid #38bdf8;
+  color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.2);
+}
 
-  /* === Action Bar === */
-  .action-bar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 15px; /* 按鈕間距 */
-  }
-  
-  .main-btn {
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    font-size: 16px;
-    transition: transform 0.1s, box-shadow 0.2s;
-  }
-  .main-btn:active { transform: scale(0.96); }
+/* === PRI 專屬樣式 (燈號下拉選單) === */
+select.pri-selector {
+  appearance: none; /* 隱藏預設箭頭，讓顏色滿版 */
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+/* 鎖定時(非編輯模式)稍微透明 */
+select.pri-selector[disabled] {
+  opacity: 0.9;
+  cursor: default;
+  border-bottom: 1px solid var(--line-color); /* 為了跟其他欄位一致 */
+}
 
-  .btn-add { background: var(--text-blue); color: #000; }
-  .btn-exit { background: #334155; color: #fff; border: 1px solid #475569; }
+/* 燈號顏色定義 */
+.pri-red { background-color: #ef4444 !important; color: white !important; }   /* Behind */
+.pri-green { background-color: #22c55e !important; color: white !important; } /* Keep */
+.pri-yellow { background-color: #eab308 !important; color: black !important; } /* Warning */
+.pri-gray { background-color: #64748b !important; color: white !important; }   /* End */
 
-  /* === 狀態切換按鈕樣式 === */
-  #btnStatus {
-    min-width: 120px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  }
-  /* OPEN 狀態樣式 (紅色) */
-  .status-open {
-    background: var(--status-open-bg);
-    color: var(--status-open-text);
-    border: 1px solid #b91c1c;
-  }
-  /* CLOSE 狀態樣式 (綠色) */
-  .status-close {
-    background: var(--status-close-bg);
-    color: var(--status-close-text);
-    border: 1px solid #15803d;
-  }
 
-  /* === Log List Area === */
-  .log-list-container {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding-right: 5px;
-  }
+/* Status Text Display */
+.status-text {
+  font-weight: bold;
+  font-size: 16px;
+  padding: 5px;
+  border: 1px solid transparent; 
+  border-bottom: 1px solid var(--line-color);
+  color: var(--blue);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.status-text.editing {
+  cursor: pointer;
+  opacity: 1;
+  border: 1px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+}
 
-  .log-row {
-    display: grid;
-    grid-template-columns: 200px 1fr 160px; 
-    gap: 0;
-    background: linear-gradient(180deg, #1e293b, #0f172a);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
+/* === Log Area === */
+.log-container { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+.log-row { display:grid; grid-template-columns: 200px 1fr 100px; background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid #334155; }
+.log-left { padding:15px; background:#0f172a; display:flex; flex-direction:column; gap:5px; text-align:center; font-size:14px; }
 
-  /* Left Column */
-  .log-left {
-    padding: 15px;
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background: rgba(15, 23, 42, 0.5);
-  }
+.log-textarea {
+  width: 100%; height: 100%; min-height: 80px;
+  background: transparent; border: none; color: #e5e7eb;
+  font-size: 16px; line-height: 1.5; resize: none; padding: 15px;
+  box-sizing: border-box; font-family: inherit; outline: none;
+}
+.log-textarea.editing { background: #020617; border: 1px dashed #475569; }
 
-  .log-date {
-    font-size: 16px;
-    font-weight: bold;
-    color: var(--text-blue);
-    border: 1px solid var(--text-blue);
-    padding: 4px;
-    text-align: center;
-    border-radius: 4px;
-  }
+.log-right { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; background: #0f172a; }
+.btn-log-save { background: var(--btn-log-save); color: #000; border: none; padding: 5px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; }
 
-  .log-engineer {
-    text-align: center;
-    color: var(--text-main);
-    font-size: 14px;
-    margin-top: auto;
-  }
+/* === Action Buttons === */
+.action-bar { display:flex; justify-content:flex-end; gap:10px; align-items:center; }
+.btn { padding:10px 24px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; font-size:14px; transition:0.2s; }
+.btn:active { transform:scale(0.96); }
 
-  /* Center Column */
-  .log-center {
-    padding: 10px;
-    position: relative;
-  }
+.btn-edit { background: var(--yellow); color: #000; }
+.btn-save { background: var(--green); color: #000; display: none; } 
+.btn-exit { background: #334155; color: #fff; border: 1px solid #475569; }
 
-  .log-textarea {
-    width: 100%;
-    height: 100%;
-    min-height: 120px;
-    background: transparent;
-    border: 1px solid transparent;
-    color: #fff;
-    font-size: 16px;
-    line-height: 1.5;
-    resize: none;
-    padding: 8px;
-    box-sizing: border-box;
-    font-family: inherit;
-  }
-
-  .log-textarea:not([readonly]) {
-    border: 1px solid var(--text-orange);
-    background: rgba(0, 0, 0, 0.3);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-  }
-
-  /* Right Column */
-  .log-right {
-    padding: 10px;
-    border-left: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: rgba(15, 23, 42, 0.5);
-  }
-
-  .btn-row-action {
-    padding: 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    text-align: center;
-    border: none;
-    font-size: 14px;
-    margin-bottom: 5px;
-  }
-
-  .btn-edit { background: var(--btn-edit); color: #000; }
-  .btn-save { background: var(--btn-save); color: #fff; display: none; }
-
-  .appendix-slot {
-    flex: 1;
-    border: 1px dashed #64748b;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    color: #64748b;
-    min-height: 25px;
-  }
-
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: #020617; }
-  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
+.status-btn { opacity: 0.5; cursor: not-allowed; }
+.status-btn.active-mode { opacity: 1; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+.status-open { background:#ef4444; color:#fff; } 
+.status-close { background:#22c55e; color:#fff; }
 </style>
 </head>
 <body>
 
   <div class="master-info">
-    <div class="info-group full-width">
-      <label>Event Title</label>
-      <div id="mTitle">Loading...</div>
+    
+    <div class="info-group" style="grid-column:span 5">
+      <label>Problem (Title)</label> 
+      <input id="mProblem" class="editable-field" readonly>
     </div>
+
+    <div class="info-group"><label>Date</label><input id="mDate" class="editable-field" readonly></div>
+    <div class="info-group"><label>Project</label><input id="mProject" class="editable-field" readonly></div>
+    <div class="info-group"><label>Customer</label><input id="mCustomer" class="editable-field" readonly></div>
+    <div class="info-group"><label>Tool ID</label><input id="mToolID" class="editable-field" readonly></div>
+    <div class="info-group"><label>Tool Type</label><input id="mToolType" class="editable-field" readonly></div>
+    
+    <div class="info-group"><label>CH</label><input id="mCH" class="editable-field" readonly></div>
+
     <div class="info-group">
-      <label>Date</label>
-      <div id="mDate">-</div>
+      <label>PRI</label>
+      <select id="mPRI" class="editable-field pri-selector" disabled onchange="updatePriColor()">
+        <option value="Keep">Keep (Green)</option>
+        <option value="Behind">Behind (Red)</option>
+        <option value="Warning">Warning (Yellow)</option>
+        <option value="End">End (Gray)</option>
+      </select>
     </div>
+
+    <div class="info-group"><label>ENG</label><input id="mENG" class="editable-field" readonly></div>
+    
     <div class="info-group">
-      <label>Customer</label>
-      <div id="mCustomer">-</div>
-    </div>
-    <div class="info-group">
-      <label>Machine</label>
-      <div id="mMachine">-</div>
-    </div>
-    <div class="info-group">
-      <label>Engineer</label>
-      <div id="mEngineer">-</div>
+      <label>Status</label>
+      <div id="mStatusDisplay" class="status-text">...</div>
     </div>
   </div>
 
   <div class="action-bar">
-    <button id="btnStatus" class="main-btn status-open" onclick="toggleStatus()">Loading...</button>
+    <button id="btnEdit" class="btn btn-edit" onclick="enableEditMode()">Edit</button>
+    <button id="btnSave" class="btn btn-save" onclick="saveMasterChanges()">Save (Master)</button>
     
-    <button class="main-btn btn-add" onclick="openAddLog()">+ Add Record</button>
-    <button class="main-btn btn-exit" onclick="window.close()">Exit</button>
+    <button id="btnStatus" class="btn status-btn" onclick="toggleStatus()">Loading...</button>
+    <button class="btn btn-exit" onclick="window.close()">Exit</button>
   </div>
 
-  <div class="log-list-container" id="logContainer">
-    <div style="text-align:center; color:#64748b; padding:20px;">Loading History...</div>
-  </div>
+  <div class="log-container" id="logBody"></div>
 
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
-let currentEventId = '';
-let currentStatus = 'OPEN'; // 預設狀態
+const p = new URLSearchParams(location.search);
+const eid = p.get('eventId');
 
-/* Init */
-window.onload = function(){
-  const params = new URLSearchParams(window.location.search);
-  currentEventId = params.get('eventId');
+let currStatus = 'OPEN';
+let isEditing = false;
+
+/* === 初始化 === */
+fetch(`${API_URL}?mode=eventFull&eventId=${eid}`)
+.then(r=>r.json())
+.then(res=>{
+  if(res.result!=='OK') return alert(res.message);
   
-  if(!currentEventId){
-    alert('Missing Event ID');
-    return;
-  }
+  const e = res.event;
+  document.getElementById('mProblem').value = e.Problem;
+  document.getElementById('mDate').value = e.Date;
+  document.getElementById('mProject').value = e.Project;
+  document.getElementById('mCustomer').value = e.Customer;
+  document.getElementById('mToolID').value = e.CustomerToolID;
+  document.getElementById('mToolType').value = e.ToolType;
+  document.getElementById('mCH').value = e.Chamber;
+  document.getElementById('mENG').value = e.ENG;
   
-  loadData();
-};
+  // 設定 PRI 並更新顏色
+  const priSelect = document.getElementById('mPRI');
+  priSelect.value = e.PRI || 'Keep'; // 預設 Keep
+  updatePriColor(); // 初始化顏色
 
-/* Load Data */
-function loadData(){
-  fetch(`${API_URL}?mode=eventFull&eventId=${currentEventId}`)
-  .then(r => r.json())
-  .then(res => {
-    if(res.result !== 'OK'){
-      alert(res.message);
-      return;
-    }
-    renderMaster(res.event);
-    renderLogs(res.logs);
-  })
-  .catch(err => console.error(err));
-}
+  document.getElementById('mStatusDisplay').innerText = e.Status;
+  currStatus = e.Status;
+  updateStatusBtnUI();
 
-/* Render Master Info */
-function renderMaster(data){
-  document.getElementById('mTitle').textContent = data.EventTitle;
-  document.getElementById('mDate').textContent = data.EventDate;
-  document.getElementById('mCustomer').textContent = data.Customer;
-  document.getElementById('mMachine').textContent = data.Machine;
-  document.getElementById('mEngineer').textContent = data.Engineer;
-
-  // 初始化狀態按鈕
-  currentStatus = data.Status || 'OPEN';
-  updateStatusButtonUI();
-}
-
-/* Render Logs List */
-function renderLogs(logs){
-  const container = document.getElementById('logContainer');
-  container.innerHTML = ''; 
-
-  if(!logs || logs.length === 0){
-    container.innerHTML = '<div style="text-align:center; color:#64748b; padding:20px;">No history records found.</div>';
-    return;
-  }
-
-  logs.forEach(log => {
-    const displayDate = log.CreateTime.split(' ')[0]; 
-    const row = document.createElement('div');
-    row.className = 'log-row';
-    row.innerHTML = `
-      <div class="log-left">
-        <div class="log-date">${displayDate}</div>
-        <div class="log-engineer">${log.Engineer}</div>
-      </div>
-      <div class="log-center">
-        <textarea id="desc_${log.LogID}" class="log-textarea" readonly>${log.ProcessDescribe}</textarea>
-      </div>
-      <div class="log-right">
-        <button id="btnEdit_${log.LogID}" class="btn-row-action btn-edit" onclick="enableEdit('${log.LogID}')">Edit</button>
-        <button id="btnSave_${log.LogID}" class="btn-row-action btn-save" onclick="saveLog('${log.LogID}')">Save</button>
-        <div class="appendix-slot">Appx</div>
-        <div class="appendix-slot">Appx</div>
-      </div>
-    `;
-    container.appendChild(row);
+  // Render Logs
+  const logDiv = document.getElementById('logBody');
+  res.logs.forEach(l => {
+    logDiv.innerHTML += `
+      <div class="log-row">
+        <div class="log-left">
+          <div>${l.CreateTime.split(' ')[0]}</div>
+          <div style="color:#38bdf8">${l.ENG}</div>
+        </div>
+        <div class="log-center">
+          <textarea id="logtext_${l.LogID}" class="log-textarea" readonly>${l.Action}</textarea>
+        </div>
+        <div class="log-right">
+          <button id="btnSaveLog_${l.LogID}" class="btn-log-save" onclick="saveSingleLog('${l.LogID}')">Save</button>
+        </div>
+      </div>`;
   });
-}
+});
 
-/* === 核心功能：狀態切換 (Toggle Status) === */
-function toggleStatus(){
-  const btn = document.getElementById('btnStatus');
-  const oldStatus = currentStatus;
-  const newStatus = (currentStatus === 'OPEN') ? 'CLOSE' : 'OPEN';
-
-  // 1. 確認提示
-  const confirmMsg = (newStatus === 'CLOSE') 
-    ? 'Sure to CLOSE this event? It will disappear from Open List.' 
-    : 'Sure to RE-OPEN this event?';
+/* === 視覺：PRI 顏色變更邏輯 === */
+function updatePriColor() {
+  const sel = document.getElementById('mPRI');
+  const val = sel.value;
   
-  if(!confirm(confirmMsg)) return;
-
-  // 2. 鎖定按鈕避免連點
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
-
-  // 3. 呼叫後端 API
-  const payload = {
-    mode: 'updateStatus',
-    EventID: currentEventId,
-    Status: newStatus
-  };
-
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.json())
-  .then(res => {
-    if(res.result === 'OK'){
-      // 4. 成功：更新本地狀態與 UI
-      currentStatus = newStatus;
-      updateStatusButtonUI();
-      // 如果結案了，可以選擇是否提示
-      if(newStatus === 'CLOSE'){
-        // alert('Event Closed.'); 
-      }
-    } else {
-      alert('Update Failed: ' + res.message);
-      updateStatusButtonUI(); // 還原
-    }
-  })
-  .catch(err => {
-    alert('Connection Error');
-    console.error(err);
-    updateStatusButtonUI(); // 還原
-  })
-  .finally(() => {
-    btn.disabled = false;
-  });
+  // 移除舊顏色
+  sel.classList.remove('pri-red', 'pri-green', 'pri-yellow', 'pri-gray');
+  
+  // 加入新顏色
+  if (val === 'Behind') sel.classList.add('pri-red');
+  else if (val === 'Keep') sel.classList.add('pri-green');
+  else if (val === 'Warning') sel.classList.add('pri-yellow');
+  else if (val === 'End') sel.classList.add('pri-gray');
 }
 
-// 根據 currentStatus 更新按鈕外觀
-function updateStatusButtonUI(){
-  const btn = document.getElementById('btnStatus');
-  if(currentStatus === 'OPEN'){
-    btn.textContent = 'OPEN';
-    btn.className = 'main-btn status-open'; // 紅色
+/* === 核心：開啟編輯模式 === */
+function enableEditMode(){
+  isEditing = true;
+
+  document.getElementById('btnEdit').style.display = 'none';
+  document.getElementById('btnSave').style.display = 'block';
+
+  // 1. 解鎖一般文字欄位
+  const inputs = document.querySelectorAll('.editable-field:not(#mPRI)'); // 排除 PRI，因為要特殊處理
+  inputs.forEach(input => {
+    input.removeAttribute('readonly');
+    input.classList.add('editing');
+  });
+
+  // 2. 處理 PRI 欄位 (根據 Status 決定是否解鎖)
+  const priSelect = document.getElementById('mPRI');
+  priSelect.classList.add('editing'); // 視覺上進入編輯模式
+  if (currStatus === 'OPEN') {
+    priSelect.removeAttribute('disabled'); // 只有 OPEN 才能改
   } else {
-    btn.textContent = 'CLOSE';
-    btn.className = 'main-btn status-close'; // 綠色
+    // 雖然進入編輯模式，但如果是 CLOSE 狀態，PRI 必須維持 End (Disabled)
+    priSelect.setAttribute('disabled', true);
   }
+
+  // 3. 解鎖 Logs
+  document.querySelectorAll('.log-textarea').forEach(area => {
+    area.removeAttribute('readonly');
+    area.classList.add('editing');
+  });
+  document.querySelectorAll('.btn-log-save').forEach(btn => {
+    btn.style.display = 'block';
+  });
+
+  // 4. 啟用 Status 按鈕
+  document.getElementById('btnStatus').classList.add('active-mode');
+  document.getElementById('mStatusDisplay').classList.add('editing');
 }
 
-/* Enable Edit Mode (Log) */
-function enableEdit(logId){
-  const txt = document.getElementById(`desc_${logId}`);
-  const btnEdit = document.getElementById(`btnEdit_${logId}`);
-  const btnSave = document.getElementById(`btnSave_${logId}`);
+/* === 儲存主檔 === */
+function saveMasterChanges(){
+  const btnSave = document.getElementById('btnSave');
+  btnSave.innerText = 'Saving...';
+  btnSave.disabled = true;
 
-  txt.removeAttribute('readonly');
-  txt.focus();
-  btnEdit.style.display = 'none';
-  btnSave.style.display = 'block';
-}
-
-/* Save Log Changes */
-function saveLog(logId){
-  const txt = document.getElementById(`desc_${logId}`);
-  const btnEdit = document.getElementById(`btnEdit_${logId}`);
-  const btnSave = document.getElementById(`btnSave_${logId}`);
-  
-  const newContent = txt.value;
-  btnSave.textContent = 'Saving...';
-  txt.setAttribute('readonly', true);
+  // PRI 因為可能被 disable，所以要確定能取到值
+  const priVal = document.getElementById('mPRI').value;
 
   const payload = {
-    mode: 'updateLog',
-    LogID: logId,
-    ProcessDescribe: newContent
+    mode: 'updateEvent',
+    EventID: eid,
+    Problem: document.getElementById('mProblem').value,
+    Date: document.getElementById('mDate').value,
+    Project: document.getElementById('mProject').value,
+    Customer: document.getElementById('mCustomer').value,
+    CustomerToolID: document.getElementById('mToolID').value,
+    ToolType: document.getElementById('mToolType').value,
+    Chamber: document.getElementById('mCH').value,
+    PRI: priVal, // 傳送燈號值
+    ENG: document.getElementById('mENG').value
   };
 
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  })
+  fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
   .then(r => r.json())
   .then(res => {
     if(res.result === 'OK'){
-      btnSave.style.display = 'none';
-      btnEdit.style.display = 'block';
-      btnSave.textContent = 'Save';
+      alert('✅ Master Info Updated');
+      location.reload(); 
     } else {
-      alert('Save Failed: ' + res.message);
-      txt.removeAttribute('readonly');
-      btnSave.textContent = 'Save';
+      alert('Failed: ' + res.message);
+      btnSave.innerText = 'Save (Master)';
+      btnSave.disabled = false;
     }
-  })
-  .catch(err => {
-    alert('Connection Error');
-    txt.removeAttribute('readonly');
-    btnSave.textContent = 'Save';
   });
 }
 
-function openAddLog(){
-  window.open(`New Event Log.html?mode=add&eventId=${currentEventId}`, '_blank', 'width=1200,height=800');
+/* === 儲存 Log === */
+function saveSingleLog(logId){
+  const txt = document.getElementById(`logtext_${logId}`).value;
+  const btn = document.getElementById(`btnSaveLog_${logId}`);
+  btn.innerText = '...'; btn.disabled = true;
+
+  fetch(API_URL, { method: 'POST', body: JSON.stringify({mode: 'updateLog', LogID: logId, Action: txt}) })
+  .then(r => r.json()).then(res => {
+    if(res.result === 'OK'){ alert('✅ Log Updated'); btn.innerText = 'Save'; btn.disabled = false; }
+    else { alert('Failed'); btn.innerText = 'Save'; btn.disabled = false; }
+  });
+}
+
+/* === 狀態切換邏輯 (連動 PRI) === */
+function toggleStatus(){
+  if(!isEditing){
+    alert('🔒 Please click "Edit" first to change status.');
+    return;
+  }
+
+  const next = currStatus==='OPEN'?'CLOSE':'OPEN';
+  if(!confirm(`Change status to ${next}?`)) return;
+  
+  const btn = document.getElementById('btnStatus');
+  btn.innerText = '...';
+  
+  fetch(API_URL, {method:'POST', body:JSON.stringify({mode:'updateStatus', EventID:eid, Status:next})})
+  .then(r=>r.json()).then(res=>{
+    if(res.result==='OK'){ 
+      currStatus = next; 
+      updateStatusBtnUI(); 
+      document.getElementById('mStatusDisplay').innerText = next;
+
+      // ★★★ 連動 PRI 邏輯 ★★★
+      const priSelect = document.getElementById('mPRI');
+      if (next === 'CLOSE') {
+        // 轉為 CLOSE：PRI 強制變 End (Gray)，並鎖定
+        priSelect.value = 'End';
+        priSelect.setAttribute('disabled', true);
+      } else {
+        // 轉為 OPEN：PRI 自動變回 Keep (Green)，並解鎖
+        priSelect.value = 'Keep';
+        priSelect.removeAttribute('disabled');
+      }
+      updatePriColor(); // 更新顏色顯示
+    }
+  });
+}
+
+function updateStatusBtnUI(){
+  const b = document.getElementById('btnStatus');
+  b.innerText = currStatus;
+  const baseClass = isEditing ? 'btn status-btn active-mode' : 'btn status-btn';
+  b.className = `${baseClass} ${currStatus==='OPEN'?'status-open':'status-close'}`;
 }
 </script>
-
 </body>
 </html>
