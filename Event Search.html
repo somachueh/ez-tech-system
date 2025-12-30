@@ -3,203 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <title>Event Search</title>
-
 <style>
-body{
-    margin:0;
-    font-family:"Segoe UI","Microsoft JhengHei";
-    background: radial-gradient(circle at top, #1c1f24, #0f1115);
-    color:#e6e6e6;
+/* === 風格設定 === */
+:root { --bg:#020617; --text:#e5e7eb; --blue:#38bdf8; --orange:#fb923c; --green:#4ade80; --border:rgba(148,163,184,.18); --panel:#162235; }
+body { margin:0; font-family:"Segoe UI"; background:radial-gradient(circle at top,#1e293b,#020617); color:var(--text); }
+.container { width:95%; margin:30px auto; padding:30px; background:var(--panel); border-radius:24px; border:1px solid var(--border); }
+
+/* Header & Search Bar */
+.header h1 { margin:0 0 20px 0; font-size:28px; color:var(--text); text-align: center; letter-spacing: 1px; }
+
+.search-box {
+  display: flex; 
+  gap: 15px; 
+  justify-content: flex-start; /* 靠左對齊 */
+  align-items: flex-end;   /* 底部對齊 */
+  background: #0f172a; 
+  padding: 25px; 
+  border-radius: 16px; 
+  margin-bottom: 30px;
+  border: 1px solid var(--border);
+  flex-wrap: wrap;
 }
-.container{
-    width:95%;
-    margin:30px auto;
-    padding:25px;
-    border:1px solid #3a3f46;
-    background:linear-gradient(180deg,#1a1d22,#121417);
+
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group label { font-size: 13px; color: var(--orange); font-weight: bold; margin-left: 2px; }
+
+input {
+  padding: 10px 15px; border-radius: 8px; border: 1px solid #334155;
+  background: #1e293b; color: #fff; font-size: 16px; outline: none;
+  height: 45px;
+  box-sizing: border-box;
 }
-h2{
-    text-align:center;
-    color:#ff66ff;
-    font-size:32px;
+
+/* Keyword 欄位寬度設定 */
+#keyword { 
+  width: 500px; 
+} 
+
+input[type="date"] { width: 160px; color-scheme: dark; }
+
+input:focus { border-color: var(--blue); box-shadow: 0 0 8px rgba(56, 189, 248, 0.2); }
+
+.btn-search {
+  padding: 0 40px; 
+  border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer;
+  background: var(--blue); color: #000; 
+  height: 45px; 
+  transition: 0.2s; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  margin-bottom: 0px;
 }
-label{color:#ffb347;font-size:18px;}
-input,select{
-    width:100%;
-    font-size:20px;
-    padding:6px;
-    border:1px solid #ff6a00;
-    background:#0f1115;
-    color:#4aa3ff;
+.btn-search:hover { background: #7dd3fc; transform: translateY(-2px); }
+.btn-search:active { transform: scale(0.95); }
+
+.btn-exit {
+  position: absolute; top: 30px; right: 30px;
+  padding: 8px 20px; border-radius: 8px; background: #0f172a; color: #fecaca; border: 1px solid var(--border); cursor: pointer; font-weight: bold;
 }
-.row{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr 2fr;
-    gap:15px;
-}
-.btn{
-    font-size:22px;
-    padding:8px 24px;
-    border:1px solid #6a6f78;
-    background:linear-gradient(#2a2f36,#1a1e24);
-    cursor:pointer;
-    margin-right:10px;
-}
-.btn-blue{color:#4aa3ff;}
-.btn-orange{color:#ff9f1a;}
-.btn-red{color:#ff4c4c;}
-.result{
-    margin-top:25px;
-    border-top:1px solid #555;
-    padding-top:15px;
-}
-.event{
-    border-bottom:1px solid #555;
-    padding:10px 0;
-}
-.event-title{
-    color:#4aa3ff;
-    font-size:20px;
-    margin-bottom:6px;
-}
-.log{
-    margin-left:20px;
-    color:#ccc;
-    white-space:pre-wrap;
-    border-left:3px solid #333;
-    padding-left:10px;
-    margin-bottom:6px;
-}
+
+/* Table */
+.table { width:100%; border-collapse:separate; border-spacing:0 10px; }
+.table th { text-align:left; color:var(--orange); padding:10px; font-size:14px; border-bottom: 1px solid #334155; }
+.table tr { background:linear-gradient(180deg,#1e293b,#0f172a); transition: transform 0.1s; }
+.table tr:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.table td { padding:12px 10px; vertical-align:middle; color: var(--blue); }
+
+.pri-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; min-width: 50px; text-align: center; color: #fff;}
+.pri-red { background: #ef4444; } .pri-green { background: #22c55e; } .pri-yellow { background: #eab308; color:#000; } .pri-gray { background: #64748b; }
+
+.row-btn { padding:5px 15px; border-radius:8px; background:#1e293b; color:var(--blue); border:1px solid var(--border); cursor:pointer; }
+.no-data { text-align: center; padding: 30px; color: #64748b; font-size: 18px; }
+
 </style>
 </head>
-
 <body>
+
 <div class="container">
-<h2>Event Search</h2>
+  <button class="btn-exit" onclick="location.href='index.html'">Exit</button>
+  
+  <div class="header">
+    <h1>Event Search</h1>
+  </div>
 
-<div class="row">
-    <div>
-        <label>From Date</label>
-        <input id="from" type="date">
+  <div class="search-box">
+    <div class="input-group">
+      <label>Keyword (Problem, ID, Customer, Tool Type...)</label>
+      <input type="text" id="keyword" placeholder="Enter keywords..." onkeypress="handleEnter(event)">
     </div>
-    <div>
-        <label>To Date</label>
-        <input id="to" type="date">
-    </div>
-    <div>
-        <label>Machine</label>
-        <select id="machine">
-            <option value="">ALL</option>
-            <option>ATFSMA1</option>
-            <option>ATPEOA1</option>
-            <option>OTHER</option>
-        </select>
-    </div>
-    <div>
-        <label>Keyword</label>
-        <input id="kw" placeholder="Event / Log keyword">
-    </div>
-</div>
 
-<br>
-<button class="btn btn-blue" onclick="search()">To Search</button>
-<button class="btn btn-orange" onclick="search('all')">All</button>
-<button class="btn btn-orange" onclick="search('unfinish')">Unfinish</button>
-<button class="btn btn-red" onclick="window.close()">Exit</button>
+    <div class="input-group">
+      <label>Start Date</label>
+      <input type="date" id="startDate">
+    </div>
 
-<div id="result" class="result">No Result</div>
+    <div class="input-group">
+      <label>End Date</label>
+      <input type="date" id="endDate">
+    </div>
+
+    <button class="btn-search" id="btnSearch" onclick="doSearch()">Search</button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th width="80">View</th>
+        <th width="100">Date</th>
+        <th width="100">Tool Type</th>
+        <th width="100">Project</th>
+        <th width="120">Customer</th>
+        <th width="120">Tool ID</th>
+        <th width="80">Status</th>
+        <th width="80">PRI</th>
+        <th>Problem</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody">
+      <tr><td colspan="9" class="no-data">Enter criteria and click Search.</td></tr>
+    </tbody>
+  </table>
+
 </div>
 
 <script>
-const events = JSON.parse(localStorage.getItem('AllEventList')||'[]');
-const logs   = JSON.parse(localStorage.getItem('EventLogList')||'[]');
+const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
 
-const fromInput = document.getElementById('from');
-const toInput   = document.getElementById('to');
-const machineEl = document.getElementById('machine');
-const kwInput   = document.getElementById('kw');
-const result    = document.getElementById('result');
-
-function toDate(d){
-    if(!d) return null;
-    return new Date(d);
+function handleEnter(e){
+  if(e.key === 'Enter') doSearch();
 }
 
-function showAlert(msg){
-    alert(msg);   // 行為刻意做成 Access 風格
+function doSearch(){
+  const keyword = document.getElementById('keyword').value.trim();
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+
+  if(!keyword && !start && !end){
+    alert('Please enter at least one search condition.');
+    return;
+  }
+
+  const btn = document.getElementById('btnSearch');
+  const originalText = btn.innerText;
+  btn.innerText = 'Searching...';
+  btn.disabled = true;
+
+  document.getElementById('resultBody').innerHTML = '<tr><td colspan="9" class="no-data">Searching...</td></tr>';
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      mode: 'searchEvents',
+      keyword: keyword,
+      startDate: start,
+      endDate: end
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    btn.innerText = originalText;
+    btn.disabled = false;
+    renderResults(res.list);
+  })
+  .catch(err => {
+    btn.innerText = originalText;
+    btn.disabled = false;
+    console.error(err);
+    alert('Connection Error');
+  });
 }
 
-function search(mode){
-    const fromVal = fromInput.value;
-    const toVal   = toInput.value;
-    const m       = machineEl.value;
-    const kw      = kwInput.value.trim().toLowerCase();
+function renderResults(list){
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
 
-    const hasDate = fromVal || toVal;
-    const hasCond = hasDate || m || kw || mode;
+  if(!list || list.length === 0){
+    tbody.innerHTML = '<tr><td colspan="9" class="no-data">No results found.</td></tr>';
+    return;
+  }
 
-    /* ===== 條件驗證（核心修正點） ===== */
-    if(!hasCond){
-        showAlert('請選擇查詢條件');
-        return;
-    }
+  list.forEach(r => {
+    let priClass = 'pri-badge';
+    if(r.PRI === 'Behind') priClass += ' pri-red';
+    else if(r.PRI === 'Keep') priClass += ' pri-green';
+    else if(r.PRI === 'Warning') priClass += ' pri-yellow';
+    else priClass += ' pri-gray';
 
-    if(hasDate && (!fromVal || !toVal)){
-        showAlert('日期查詢請同時設定 From 與 To');
-        return;
-    }
+    const statusStyle = r.Status === 'OPEN' ? 'color:#ef4444;font-weight:bold;' : 'color:#22c55e;font-weight:bold;';
 
-    const from = toDate(fromVal);
-    const to   = toDate(toVal);
-
-    let html = '';
-
-    events.forEach(e=>{
-        if(mode==='unfinish' && e.status!=='unfinish') return;
-        if(m && e.machine!==m) return;
-
-        const ed = toDate(e.date.replace(/\//g,'-'));
-        if(from && ed < from) return;
-        if(to && ed > to) return;
-
-        const eventMatch =
-            !kw ||
-            e.title?.toLowerCase().includes(kw) ||
-            e.process?.toLowerCase().includes(kw);
-
-        const matchedLogs = logs
-            .filter(l=>l.eventId===e.id)
-            .filter(l=>!kw || l.process.toLowerCase().includes(kw));
-
-        if(!eventMatch && matchedLogs.length===0) return;
-
-        html += `<div class="event">
-            <div class="event-title">
-                ${e.date} ｜ ${e.machine} ｜ ${e.title}
-                <span style="float:right;color:#ff9f1a;">
-                    ${e.status || ''}
-                </span>
-            </div>
-        `;
-
-        if(e.process){
-            html += `<div class="log">${e.process}</div>`;
-        }
-
-        matchedLogs
-            .sort((a,b)=>b.logDate.localeCompare(a.logDate))
-            .forEach(l=>{
-                html += `<div class="log">
-${l.logDate} / ${l.shift} / ${l.engineer}
-${l.process}
-</div>`;
-            });
-
-        html += `</div>`;
-    });
-
-    result.innerHTML = html || 'No Result';
+    tbody.innerHTML += `
+      <tr>
+        <td><button class="row-btn" onclick="openDetail('${r.ID}')">Detail</button></td>
+        <td>${r.Date}</td>
+        
+        <td style="color:#38bdf8; font-weight:bold;">${r.ToolType||'-'}</td>
+        
+        <td>${r.Project}</td>
+        <td>${r.Customer}</td>
+        <td>${r.ToolID}</td>
+        <td style="${statusStyle}">${r.Status}</td>
+        <td><span class="${priClass}">${r.PRI||'-'}</span></td>
+        <td>${r.Problem}</td>
+      </tr>
+    `;
+  });
 }
+
+function openDetail(id){ window.open(`Event Detail.html?eventId=${id}`, '_blank', 'width=1400,height=900'); }
 </script>
 </body>
 </html>

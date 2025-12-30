@@ -3,159 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <title>Daily Report</title>
-
 <style>
-body{
-    font-family:"Times New Roman","Microsoft JhengHei";
-    background:#ffffff;
-    color:#000;
-    margin:40px;
+/* === 風格設定 (與主系統一致) === */
+:root { --bg:#020617; --panel:#0f172a; --text:#e5e7eb; --blue:#38bdf8; --orange:#fb923c; --green:#4ade80; --border:#334155; }
+body { margin:0; padding:20px; font-family:"Segoe UI"; background:radial-gradient(circle at top,#1e293b,#020617); color:var(--text); min-height:100vh; }
+
+.container { max-width: 1000px; margin: 0 auto; }
+
+/* Header */
+.report-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--blue); padding-bottom: 15px; }
+.report-header h1 { margin: 0; color: var(--blue); text-transform: uppercase; letter-spacing: 2px; }
+.report-header .date { font-size: 18px; color: var(--orange); margin-top: 10px; font-weight: bold; }
+
+/* Report Cards */
+.event-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-.header{
-    text-align:center;
-    font-size:36px;
-    color:#2a2aa5;
-    border-bottom:2px solid green;
-    padding-bottom:10px;
-    margin-bottom:30px;
+.card-header {
+  background: rgba(56, 189, 248, 0.1);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
 }
+.card-header .tool { font-weight: bold; color: var(--orange); font-size: 18px; }
+.card-header .status { font-size: 14px; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+.st-OPEN { background: #ef4444; color: #fff; }
+.st-CLOSE { background: #22c55e; color: #fff; }
 
-.day-block{
-    margin-bottom:40px;
+.card-body { padding: 20px; }
+.problem-title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 15px; }
+.info-row { display: flex; gap: 20px; font-size: 14px; color: #94a3b8; margin-bottom: 15px; }
+
+/* Log List inside Card */
+.log-list { list-style: none; padding: 0; margin: 0; border-top: 1px dashed var(--border); }
+.log-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  gap: 15px;
 }
+.log-time { color: var(--blue); font-weight: bold; min-width: 50px; }
+.log-eng { color: var(--green); font-weight: bold; min-width: 60px; }
+.log-action { color: #e5e7eb; line-height: 1.5; white-space: pre-wrap; flex: 1; }
 
-.day-title{
-    font-size:22px;
-    color:#d100ff;
-    margin-bottom:10px;
-    border-bottom:1px solid green;
-    padding-bottom:5px;
-}
-
-.event-header{
-    display:flex;
-    font-size:18px;
-    margin-top:15px;
-    border-bottom:1px solid #00aaff;
-    padding-bottom:4px;
-}
-
-.event-machine{
-    width:120px;
-    color:#ff6600;
-    font-weight:bold;
-}
-
-.event-title{
-    flex:1;
-    color:#008000;
-}
-
-.event-status{
-    width:100px;
-    text-align:right;
-    color:#888;
-}
-
-.log{
-    margin-left:40px;
-    margin-top:8px;
-    font-size:16px;
-}
-
-.log-head{
-    color:#ff6600;
-    margin-bottom:4px;
-}
-
-.log-process{
-    color:#0033cc;
-    white-space:pre-wrap;
-}
-
-hr{
-    margin:20px 0;
+.btn-back {
+  position: fixed; bottom: 20px; right: 20px;
+  padding: 12px 25px; background: var(--blue); color: #000;
+  border: none; border-radius: 30px; font-weight: bold; cursor: pointer;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
 }
 </style>
 </head>
-
 <body>
 
-<div class="header">
-    Daily Report
+<div class="container">
+  <div class="report-header">
+    <h1 id="pageTitle">Loading Report...</h1>
+    <div class="date" id="reportDate">...</div>
+  </div>
+
+  <div id="reportContainer">
+    </div>
 </div>
 
-<div id="report"></div>
+<button class="btn-back" onclick="location.href='index.html'">Back to Index</button>
 
 <script>
-const events = JSON.parse(localStorage.getItem('AllEventList')||'[]');
-const logs   = JSON.parse(localStorage.getItem('EventLogList')||'[]');
-const report = document.getElementById('report');
+const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
 
-/* ===== 依日期分組 ===== */
-const byDate = {};
-events.forEach(e=>{
-    if(!byDate[e.date]) byDate[e.date]=[];
-    byDate[e.date].push(e);
-});
+// 取得網址參數 ?day=today 或 ?day=yesterday
+const params = new URLSearchParams(window.location.search);
+const dayMode = params.get('day') || 'today'; // 預設 today
 
-/* ===== 日期排序（舊 → 新，可自行反轉） ===== */
-Object.keys(byDate).sort().forEach(date=>{
-    const dayDiv=document.createElement('div');
-    dayDiv.className='day-block';
+// 設定標題
+document.getElementById('pageTitle').innerText = dayMode === 'today' ? "Today's Report" : "Yesterday's Report";
 
-    dayDiv.innerHTML=`<div class="day-title">${date}</div>`;
+// 發送請求
+fetch(API_URL, {
+  method: 'POST',
+  body: JSON.stringify({ mode: 'getDailyReport', day: dayMode })
+})
+.then(r => r.json())
+.then(res => {
+  if(res.result !== 'OK') {
+    document.getElementById('reportContainer').innerHTML = `<h3 style="text-align:center;color:red">${res.message}</h3>`;
+    return;
+  }
 
-    byDate[date].forEach(e=>{
-        const evDiv=document.createElement('div');
+  // 顯示日期
+  document.getElementById('reportDate').innerText = res.date;
+  const list = res.report;
+  const container = document.getElementById('reportContainer');
 
-        evDiv.innerHTML=`
-            <div class="event-header">
-                <div class="event-machine">${e.machine||''}</div>
-                <div class="event-title">${e.title||''}</div>
-                <div class="event-status">${e.status==='unfinish'?'未結案':'結案'}</div>
-            </div>
-        `;
+  if(list.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:50px; color:#64748b; font-size:20px;">No logs found for this date.</div>`;
+    return;
+  }
 
-        /* 初始紀錄 */
-        if(e.process){
-            evDiv.innerHTML+=`
-                <div class="log">
-                    <div class="log-head">
-                        ${e.date} / ${e.shift||''} / ${e.engineer||''}
-                    </div>
-                    <div class="log-process">${e.process}</div>
-                </div>
-            `;
-        }
-
-        /* 後續 Log（新在上） */
-        logs
-          .filter(l=>l.eventId===e.id)
-          .sort((a,b)=>{
-              if(a.logDate===b.logDate){
-                  return b.logId.localeCompare(a.logId);
-              }
-              return b.logDate.localeCompare(a.logDate);
-          })
-          .forEach(l=>{
-            evDiv.innerHTML+=`
-                <div class="log">
-                    <div class="log-head">
-                        ${l.logDate} / ${l.shift} / ${l.engineer}
-                    </div>
-                    <div class="log-process">${l.process}</div>
-                </div>
-            `;
-          });
-
-        dayDiv.appendChild(evDiv);
+  // 渲染資料
+  let html = '';
+  list.forEach(item => {
+    const info = item.Info;
+    const statusClass = info.Status === 'OPEN' ? 'st-OPEN' : 'st-CLOSE';
+    
+    // 組合 Logs
+    let logHtml = '';
+    item.Logs.forEach(l => {
+      logHtml += `
+        <li class="log-item">
+          <div class="log-time">${l.Time}</div>
+          <div class="log-eng">${l.ENG}</div>
+          <div class="log-action">${l.Action}</div>
+        </li>`;
     });
 
-    report.appendChild(dayDiv);
-});
-</script>
+    // 組合 Card
+    html += `
+      <div class="event-card">
+        <div class="card-header">
+          <div class="tool">${info.Customer} - ${info.ToolID} (${info.ToolType})</div>
+          <div class="status ${statusClass}">${info.Status}</div>
+        </div>
+        <div class="card-body">
+          <div class="problem-title">${info.Problem}</div>
+          <div class="info-row">
+            <span>Project: ${info.Project}</span>
+            <span>PRI: <span style="color:${getPriColor(info.PRI)}">${info.PRI}</span></span>
+          </div>
+          <ul class="log-list">
+            ${logHtml}
+          </ul>
+        </div>
+      </div>
+    `;
+  });
 
+  container.innerHTML = html;
+});
+
+function getPriColor(p){
+  if(p==='Behind') return '#ef4444';
+  if(p==='Keep') return '#4ade80';
+  if(p==='Warning') return '#eab308';
+  return '#94a3b8';
+}
+</script>
 </body>
 </html>
