@@ -35,7 +35,7 @@ input {
   box-sizing: border-box;
 }
 
-/* Keyword 欄位寬度設定 */
+/* Keyword 欄位寬度 */
 #keyword { 
   width: 500px; 
 } 
@@ -194,7 +194,7 @@ function renderResults(list){
         <td><button class="row-btn" onclick="openDetail('${r.ID}')">Detail</button></td>
         <td>${r.Date}</td>
         
-        <td style="color:#38bdf8; font-weight:bold;">${r.ToolType||'-'}</td>
+        <td style="color:#38bdf8;">${r.ToolType||'-'}</td>
         
         <td>${r.Project}</td>
         <td>${r.Customer}</td>
