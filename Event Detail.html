@@ -146,9 +146,9 @@ select.pri-selector[disabled] {
     <div class="info-group">
       <label>PRI</label>
       <select id="mPRI" class="editable-field pri-selector" disabled onchange="updatePriColor()">
-        <option value="Keep">Low (Green)</option>
-        <option value="Behind">High (Red)</option>
-        <option value="Warning">Midd (Yellow)</option>
+        <option value="Low">Low (Green)</option>
+        <option value="High">High (Red)</option>
+        <option value="Midd">Midd (Yellow)</option>
         <option value="End">End (Gray)</option>
       </select>
     </div>
@@ -243,9 +243,9 @@ function updatePriColor() {
   
   sel.classList.remove('pri-red', 'pri-green', 'pri-yellow', 'pri-gray');
   
-  if (val === 'Behind') sel.classList.add('pri-red');
-  else if (val === 'Keep') sel.classList.add('pri-green');
-  else if (val === 'Warning') sel.classList.add('pri-yellow');
+  if (val === 'High') sel.classList.add('pri-red');
+  else if (val === 'Low') sel.classList.add('pri-green');
+  else if (val === 'Midd') sel.classList.add('pri-yellow');
   else if (val === 'End') sel.classList.add('pri-gray');
 }
 
