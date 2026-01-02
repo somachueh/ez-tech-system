@@ -83,9 +83,9 @@ body{ margin:0; font-family:"Segoe UI"; background:radial-gradient(circle at top
   text-align: center;
   min-width: 60px;
 }
-.pri-red { background: #ef4444; color: white; }    /* Behind */
-.pri-green { background: #22c55e; color: white; }  /* Keep */
-.pri-yellow { background: #eab308; color: black; } /* Warning */
+.pri-red { background: #ef4444; color: white; }    /* High */
+.pri-green { background: #22c55e; color: white; }  /* Low */
+.pri-yellow { background: #eab308; color: black; } /* Midd */
 .pri-gray { background: #64748b; color: white; }   /* End */
 .pri-normal { color: var(--blue); }
 
@@ -106,9 +106,9 @@ body{ margin:0; font-family:"Segoe UI"; background:radial-gradient(circle at top
 
     <select id="priFilter" class="pri-filter-select" onchange="renderTable()">
       <option value="ALL">💡 All Lights</option>
-      <option value="Behind">🔴 Behind (Red)</option>
-      <option value="Keep">🟢 Keep (Green)</option>
-      <option value="Warning">🟡 Warning (Yellow)</option>
+      <option value="High">🔴 High (Red)</option>
+      <option value="Low">🟢 Low (Green)</option>
+      <option value="Midd">🟡 Midd (Yellow)</option>
       <option value="End">⚪ End (Gray)</option>
     </select>
 
@@ -199,9 +199,9 @@ function renderTable(){
     // 判斷燈號顏色 class
     let priClass = 'pri-normal';
     const p = r.PRI;
-    if(p === 'Behind') priClass = 'pri-badge pri-red';
-    else if(p === 'Keep') priClass = 'pri-badge pri-green';
-    else if(p === 'Warning') priClass = 'pri-badge pri-yellow';
+    if(p === 'High') priClass = 'pri-badge pri-red';
+    else if(p === 'Low') priClass = 'pri-badge pri-green';
+    else if(p === 'Midd') priClass = 'pri-badge pri-yellow';
     else if(p === 'End') priClass = 'pri-badge pri-gray';
 
     tbody.innerHTML += `

@@ -55,18 +55,17 @@ body { margin:0; padding:20px; font-family:"Segoe UI"; background:var(--bg); col
 
 /* === PRI 專屬樣式 (燈號下拉選單) === */
 select.pri-selector {
-  appearance: none; /* 隱藏預設箭頭，讓顏色滿版 */
+  appearance: none;
   text-align: center;
   font-weight: bold;
   cursor: pointer;
   border-radius: 6px;
   border: 1px solid transparent;
 }
-/* 鎖定時(非編輯模式)稍微透明 */
 select.pri-selector[disabled] {
   opacity: 0.9;
   cursor: default;
-  border-bottom: 1px solid var(--line-color); /* 為了跟其他欄位一致 */
+  border-bottom: 1px solid var(--line-color);
 }
 
 /* 燈號顏色定義 */
@@ -100,6 +99,7 @@ select.pri-selector[disabled] {
 .log-row { display:grid; grid-template-columns: 200px 1fr 100px; background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid #334155; }
 .log-left { padding:15px; background:#0f172a; display:flex; flex-direction:column; gap:5px; text-align:center; font-size:14px; }
 
+/* 固定高度的 Log 輸入框 */
 .log-textarea {
   width: 100%; height: 100%; min-height: 80px;
   background: transparent; border: none; color: #e5e7eb;
@@ -146,9 +146,9 @@ select.pri-selector[disabled] {
     <div class="info-group">
       <label>PRI</label>
       <select id="mPRI" class="editable-field pri-selector" disabled onchange="updatePriColor()">
-        <option value="Keep">Keep (Green)</option>
-        <option value="Behind">Behind (Red)</option>
-        <option value="Warning">Warning (Yellow)</option>
+        <option value="Keep">Low (Green)</option>
+        <option value="Behind">High (Red)</option>
+        <option value="Warning">Midd (Yellow)</option>
         <option value="End">End (Gray)</option>
       </select>
     </div>
@@ -172,6 +172,7 @@ select.pri-selector[disabled] {
   <div class="log-container" id="logBody"></div>
 
 <script>
+// ★★★ 請確認您的 GAS URL ★★★
 const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
 const p = new URLSearchParams(location.search);
 const eid = p.get('eventId');
@@ -195,16 +196,28 @@ fetch(`${API_URL}?mode=eventFull&eventId=${eid}`)
   document.getElementById('mCH').value = e.Chamber;
   document.getElementById('mENG').value = e.ENG;
   
-  // 設定 PRI 並更新顏色
   const priSelect = document.getElementById('mPRI');
-  priSelect.value = e.PRI || 'Keep'; // 預設 Keep
-  updatePriColor(); // 初始化顏色
+  priSelect.value = e.PRI || 'Keep'; 
+  updatePriColor(); 
 
   document.getElementById('mStatusDisplay').innerText = e.Status;
   currStatus = e.Status;
   updateStatusBtnUI();
 
-  // Render Logs
+  // ★★★ 關鍵修改：Log 日期排序 (降序) ★★★
+  res.logs.sort((a, b) => {
+      // 先比較 LogDate
+      const dateA = new Date(a.LogDate);
+      const dateB = new Date(b.LogDate);
+      if (dateA > dateB) return -1;
+      if (dateA < dateB) return 1;
+      
+      // 日期一樣則比較 CreateTime
+      const timeA = new Date(a.CreateTime);
+      const timeB = new Date(b.CreateTime);
+      return timeB - timeA;
+  });
+
   const logDiv = document.getElementById('logBody');
   res.logs.forEach(l => {
     logDiv.innerHTML += `
@@ -228,10 +241,8 @@ function updatePriColor() {
   const sel = document.getElementById('mPRI');
   const val = sel.value;
   
-  // 移除舊顏色
   sel.classList.remove('pri-red', 'pri-green', 'pri-yellow', 'pri-gray');
   
-  // 加入新顏色
   if (val === 'Behind') sel.classList.add('pri-red');
   else if (val === 'Keep') sel.classList.add('pri-green');
   else if (val === 'Warning') sel.classList.add('pri-yellow');
@@ -245,24 +256,20 @@ function enableEditMode(){
   document.getElementById('btnEdit').style.display = 'none';
   document.getElementById('btnSave').style.display = 'block';
 
-  // 1. 解鎖一般文字欄位
-  const inputs = document.querySelectorAll('.editable-field:not(#mPRI)'); // 排除 PRI，因為要特殊處理
+  const inputs = document.querySelectorAll('.editable-field:not(#mPRI)'); 
   inputs.forEach(input => {
     input.removeAttribute('readonly');
     input.classList.add('editing');
   });
 
-  // 2. 處理 PRI 欄位 (根據 Status 決定是否解鎖)
   const priSelect = document.getElementById('mPRI');
-  priSelect.classList.add('editing'); // 視覺上進入編輯模式
+  priSelect.classList.add('editing'); 
   if (currStatus === 'OPEN') {
-    priSelect.removeAttribute('disabled'); // 只有 OPEN 才能改
+    priSelect.removeAttribute('disabled'); 
   } else {
-    // 雖然進入編輯模式，但如果是 CLOSE 狀態，PRI 必須維持 End (Disabled)
     priSelect.setAttribute('disabled', true);
   }
 
-  // 3. 解鎖 Logs
   document.querySelectorAll('.log-textarea').forEach(area => {
     area.removeAttribute('readonly');
     area.classList.add('editing');
@@ -271,7 +278,6 @@ function enableEditMode(){
     btn.style.display = 'block';
   });
 
-  // 4. 啟用 Status 按鈕
   document.getElementById('btnStatus').classList.add('active-mode');
   document.getElementById('mStatusDisplay').classList.add('editing');
 }
@@ -282,7 +288,6 @@ function saveMasterChanges(){
   btnSave.innerText = 'Saving...';
   btnSave.disabled = true;
 
-  // PRI 因為可能被 disable，所以要確定能取到值
   const priVal = document.getElementById('mPRI').value;
 
   const payload = {
@@ -295,7 +300,7 @@ function saveMasterChanges(){
     CustomerToolID: document.getElementById('mToolID').value,
     ToolType: document.getElementById('mToolType').value,
     Chamber: document.getElementById('mCH').value,
-    PRI: priVal, // 傳送燈號值
+    PRI: priVal,
     ENG: document.getElementById('mENG').value
   };
 
@@ -346,18 +351,15 @@ function toggleStatus(){
       updateStatusBtnUI(); 
       document.getElementById('mStatusDisplay').innerText = next;
 
-      // ★★★ 連動 PRI 邏輯 ★★★
       const priSelect = document.getElementById('mPRI');
       if (next === 'CLOSE') {
-        // 轉為 CLOSE：PRI 強制變 End (Gray)，並鎖定
         priSelect.value = 'End';
         priSelect.setAttribute('disabled', true);
       } else {
-        // 轉為 OPEN：PRI 自動變回 Keep (Green)，並解鎖
         priSelect.value = 'Keep';
         priSelect.removeAttribute('disabled');
       }
-      updatePriColor(); // 更新顏色顯示
+      updatePriColor(); 
     }
   });
 }

@@ -44,9 +44,9 @@
   }
 
   /* 燈號顏色定義 */
-  .pri-red { background-color: #ef4444 !important; color: white !important; }   /* Behind */
-  .pri-green { background-color: #22c55e !important; color: white !important; } /* Keep */
-  .pri-yellow { background-color: #eab308 !important; color: black !important; } /* Warning */
+  .pri-red { background-color: #ef4444 !important; color: white !important; }   /* High */
+  .pri-green { background-color: #22c55e !important; color: white !important; } /* Low */
+  .pri-yellow { background-color: #eab308 !important; color: black !important; } /* Midd */
   .pri-gray { background-color: #64748b !important; color: white !important; }   /* End */
 
   /* 右側附件區 */
@@ -84,9 +84,9 @@
     <div class="field-group">
       <label>PRI (Priority)</label>
       <select id="pri" onchange="updatePriColor()">
-        <option value="Keep">Keep (Green)</option>
-        <option value="Behind">Behind (Red)</option>
-        <option value="Warning">Warning (Yellow)</option>
+        <option value="Low">Low (Green)</option>
+        <option value="High">High (Red)</option>
+        <option value="Midd">Midd (Yellow)</option>
        </select>
     </div>
 
@@ -161,9 +161,9 @@ function updatePriColor(){
   sel.className = ''; 
   
   // 依據值加入對應顏色 class
-  if(val === 'Keep') sel.classList.add('pri-green');
-  else if(val === 'Behind') sel.classList.add('pri-red');
-  else if(val === 'Warning') sel.classList.add('pri-yellow');
+  if(val === 'Low') sel.classList.add('pri-green');
+  else if(val === 'High') sel.classList.add('pri-red');
+  else if(val === 'Midd') sel.classList.add('pri-yellow');
   else if(val === 'End') sel.classList.add('pri-gray');
 }
 
