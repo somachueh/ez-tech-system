@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Detail</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* === EZ TECH 風格 === */
+:root { --bg:#020617; --panel:#0f172a; --input-bg:#1e293b; --border:#334155; --text:#e5e7eb; --blue:#38bdf8; --green:#4ade80; --red:#ef4444; --yellow:#eab308; }
+body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var(--bg); color:var(--text); }
+
+/* === 上方 Master Info 區塊 === */
+.master-container {
+  background: var(--panel); padding: 30px; border-radius: 16px; border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 30px;
+}
+
+.section-title { font-size: 20px; font-weight: bold; color: var(--blue); margin-bottom: 20px; border-left: 4px solid var(--blue); padding-left: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+/* 網格表單 */
+.form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.colspan-2 { grid-column: span 2; }
+.full-width { grid-column: 1 / -1; }
+
+label { font-size: 13px; color: var(--yellow); font-weight: bold; }
+input, select, textarea {
+  background: var(--input-bg); border: 1px solid var(--border); color: #fff;
+  padding: 10px 12px; border-radius: 6px; font-size: 15px; outline: none; transition: 0.3s;
+  font-family: inherit;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--blue); }
+input[type="date"] { color-scheme: dark; }
+
+/* 唯讀狀態樣式 */
+input:disabled, select:disabled, textarea:disabled {
+  opacity: 0.7; cursor: not-allowed; border-color: transparent; background: #162032; color: #94a3b8;
+}
+
+/* 狀態選單 */
+#pStatus { font-weight: bold; text-align: center; }
+#pStatus.running { background: var(--green); color: #000; }
+#pStatus.suspend { background: var(--red); color: #fff; }
+#pStatus.finish { background: #94a3b8; color: #fff; }
+#pStatus:disabled { opacity: 0.8; }
+
+/* === 下方 Log 區塊 === */
+.log-container { 
+  background: var(--panel); padding: 20px; border-radius: 16px; border: 1px solid var(--border); 
+  min-height: 300px; display: flex; flex-direction: column; gap: 15px;
+}
+
+/* Log 輸入區 */
+.log-input-area { 
+  display: grid; grid-template-columns: 150px 150px 1fr 100px; gap: 10px; 
+  background: #162032; padding: 15px; border-radius: 10px; border: 1px dashed var(--border); 
+  transition: 0.3s; 
+  align-items: start;
+}
+.log-input-area.locked { opacity: 0.3; pointer-events: none; }
+
+.btn-add-log { background: var(--blue); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; height: 42px;}
+.btn-add-log:hover { filter: brightness(1.1); }
+
+/* Log 列表 */
+.log-list { display: flex; flex-direction: column; gap: 10px; }
+.log-row { 
+  display: grid; grid-template-columns: 120px 120px 1fr; gap: 15px; 
+  background: #1e293b; padding: 15px; border-radius: 8px; border-left: 3px solid var(--border); 
+  align-items: start;
+}
+
+.log-date { color: var(--green); font-size: 14px; font-weight: bold; padding-top: 5px; }
+.log-eng { color: var(--blue); font-weight: bold; font-size: 14px; padding-top: 5px; }
+
+.log-desc-edit {
+  background: transparent; border: 1px solid transparent; color: #fff;
+  font-size: 15px; line-height: 1.5; resize: vertical; min-height: 24px; padding: 5px;
+}
+.log-desc-edit:enabled {
+  background: var(--input-bg); border: 1px solid var(--border); color: #fff;
+}
+
+/* === 底部按鈕區 === */
+.action-bar { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
+.btn-main { padding: 12px 30px; border-radius: 8px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+.btn-main:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+.btn-edit { background: var(--yellow); color: #000; }  
+.btn-save { background: var(--green); color: #000; display: none; } 
+.btn-exit { background: var(--border); color: #fff; }
+
+.loading-mask { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; color: var(--blue); font-size: 20px; font-weight: bold; display: none; }
+</style>
+</head>
+<body>
+
+<div id="loadingMask" class="loading-mask"><i class="fa-solid fa-spinner fa-spin"></i> Processing...</div>
+
+<div class="master-container">
+  <div class="section-title">
+    <span>Project Master Info</span>
+    <span id="modeLabel" style="font-size:14px; color:#94a3b8; font-weight:normal;">[ View Mode ]</span>
+  </div>
+  <input type="hidden" id="pID">
+  
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Date (Start)</label>
+      <input type="date" id="pStart">
+    </div>
+    <div class="form-group">
+      <label>Due Date</label>
+      <input type="date" id="pDue">
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="pStatus" class="running" onchange="updateStatusColor(this)">
+        <option value="Running">Running (Green)</option>
+        <option value="Suspend">Suspend (Red)</option>
+        <option value="Finish">Finish (Gray)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Customer</label>
+      <input type="text" id="pCust" placeholder="e.g. TSMC">
+    </div>
+    <div class="form-group">
+      <label>Tool ID</label>
+      <input type="text" id="pToolID" placeholder="e.g. Tool-01">
+    </div>
+    <div class="form-group">
+      <label>Tool Type</label>
+      <input type="text" id="pType" placeholder="e.g. HDP">
+    </div>
+
+    <div class="form-group">
+      <label>Owner (Leader)</label>
+      <input type="text" id="pOwner" placeholder="e.g. Soma">
+    </div>
+    <div class="form-group colspan-2">
+      <label>Project Name *</label>
+      <input type="text" id="pName" placeholder="Project Name">
+    </div>
+
+    <div class="form-group full-width">
+      <label>Description (Master)</label>
+      <textarea id="pDesc" rows="6" placeholder="Brief description..."></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="log-container">
+  <div class="section-title">Project Logs</div>
+  
+  <div class="log-input-area" id="newLogArea">
+    <input type="date" id="logDate">
+    <input type="text" id="logEng" placeholder="Engineer">
+    <textarea id="logAction" rows="1" style="height:42px; padding:10px;" placeholder="Log Description (Enter for new line)..."></textarea>
+    <button class="btn-add-log" onclick="addLog()">+ Add</button>
+  </div>
+
+  <div class="log-list" id="logListBody">
+    </div>
+</div>
+
+<div class="action-bar">
+  <button id="btnEdit" class="btn-main btn-edit" onclick="enableEditMode()">
+    <i class="fa-solid fa-pen-to-square"></i> Edit
+  </button>
+  
+  <button id="btnSave" class="btn-main btn-save" onclick="saveMaster()">
+    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+  </button>
+  
+  <button class="btn-main btn-exit" onclick="location.href='Project System.html'">
+    <i class="fa-solid fa-right-from-bracket"></i> Exit
+  </button>
+</div>
+
+<script>
+// ★★★ 請確認您的 GAS URL (EZ TECH) ★★★
+const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
+
+let modifiedLogs = new Set();
+
+window.onload = function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const pid = urlParams.get('id');
+  
+  const today = new Date().toISOString().substring(0,10);
+  document.getElementById('pStart').value = today;
+  document.getElementById('logDate').value = today;
+
+  if (pid) {
+    document.getElementById('pID').value = pid;
+    loadProjectData(pid);
+    setEditMode(false);
+  } else {
+    document.querySelector('.log-container').style.display = 'none';
+    document.getElementById('btnEdit').style.display = 'none';
+    const btnSave = document.getElementById('btnSave');
+    btnSave.style.display = 'flex';
+    btnSave.innerHTML = '<i class="fa-solid fa-plus"></i> Create Project';
+    document.getElementById('modeLabel').innerText = '[ New Project ]';
+  }
+};
+
+function setEditMode(editable) {
+  const inputs = document.querySelectorAll('.master-container input, .master-container select, .master-container textarea');
+  inputs.forEach(el => el.disabled = !editable);
+
+  const logArea = document.getElementById('newLogArea');
+  const logInputs = logArea.querySelectorAll('input, textarea, button');
+  if (editable) {
+    logArea.classList.remove('locked');
+    logInputs.forEach(el => el.disabled = false);
+  } else {
+    logArea.classList.add('locked');
+    logInputs.forEach(el => el.disabled = true);
+  }
+
+  const historyLogs = document.querySelectorAll('.log-desc-edit');
+  historyLogs.forEach(el => el.disabled = !editable);
+
+  if (editable) {
+    document.getElementById('btnEdit').style.display = 'none';
+    document.getElementById('btnSave').style.display = 'flex';
+    document.getElementById('modeLabel').innerText = '[ Edit Mode ]';
+    document.getElementById('modeLabel').style.color = '#4ade80'; 
+  } else {
+    document.getElementById('btnEdit').style.display = 'flex';
+    document.getElementById('btnSave').style.display = 'none';
+    document.getElementById('modeLabel').innerText = '[ View Mode ]';
+    document.getElementById('modeLabel').style.color = '#94a3b8'; 
+  }
+}
+
+function enableEditMode() {
+  setEditMode(true);
+}
+
+function loadProjectData(pid) {
+  showLoading(true);
+  modifiedLogs.clear();
+
+  fetch(API_URL, { method: 'POST', body: JSON.stringify({ mode: 'getProjectFull', ProjectID: pid }) })
+  .then(r => r.json())
+  .then(res => {
+    showLoading(false);
+    if(res.result !== 'OK') return alert(res.message);
+
+    const h = res.header;
+    document.getElementById('pName').value = h.ProjectName;
+    document.getElementById('pCust').value = h.Customer;
+    document.getElementById('pOwner').value = h.Owner;
+    document.getElementById('pToolID').value = h.ToolID;
+    document.getElementById('pType').value = h.ToolType;
+    document.getElementById('pStart').value = h.StartDate ? h.StartDate.replace(/\//g, '-') : '';
+    document.getElementById('pDue').value = h.DueDate ? h.DueDate.replace(/\//g, '-') : '';
+    document.getElementById('pStatus').value = h.Status;
+    document.getElementById('pDesc').value = h.Description;
+    updateStatusColor(document.getElementById('pStatus'));
+
+    const list = document.getElementById('logListBody');
+    list.innerHTML = '';
+    res.logs.forEach(l => {
+      list.innerHTML += `
+        <div class="log-row">
+          <div class="log-date">${l.LogDate}</div>
+          <div class="log-eng">${l.ENG}</div>
+          <textarea class="log-desc-edit" data-lid="${l.LogID}" disabled onchange="markLogModified('${l.LogID}', this.value)">${l.Action}</textarea>
+        </div>
+      `;
+    });
+  });
+}
+
+function markLogModified(lid, val) {
+  modifiedLogs.add({ LogID: lid, Action: val });
+}
+
+async function saveMaster() {
+  const name = document.getElementById('pName').value;
+  if(!name) return alert('Project Name is required!');
+
+  showLoading(true);
+  const isNew = !document.getElementById('pID').value;
+
+  const masterPayload = {
+    mode: isNew ? 'createProject' : 'updateProject',
+    ProjectID:   document.getElementById('pID').value,
+    ProjectName: name,
+    Customer:    document.getElementById('pCust').value,
+    Owner:       document.getElementById('pOwner').value,
+    ToolID:      document.getElementById('pToolID').value,
+    ToolType:    document.getElementById('pType').value,
+    StartDate:   document.getElementById('pStart').value.replace(/-/g, '/'),
+    DueDate:     document.getElementById('pDue').value.replace(/-/g, '/'),
+    Status:      document.getElementById('pStatus').value,
+    Description: document.getElementById('pDesc').value
+  };
+
+  try {
+    const r1 = await fetch(API_URL, { method: 'POST', body: JSON.stringify(masterPayload) });
+    const res1 = await r1.json();
+    if(res1.result !== 'OK') throw new Error(res1.message);
+
+    if (!isNew && modifiedLogs.size > 0) {
+      for (let logItem of modifiedLogs) {
+        await fetch(API_URL, { 
+          method: 'POST', 
+          body: JSON.stringify({ 
+            mode: 'updateProjectLog', 
+            LogID: logItem.LogID, 
+            Action: logItem.Action 
+          }) 
+        });
+      }
+    }
+
+    showLoading(false);
+    alert(isNew ? 'Project Created!' : 'Saved Successfully!');
+    
+    if(isNew) {
+      location.href = 'Project System.html'; 
+    } else {
+      setEditMode(false);
+      modifiedLogs.clear();
+    }
+
+  } catch (err) {
+    showLoading(false);
+    alert('Error: ' + err.message);
+  }
+}
+
+function addLog() {
+  if(document.getElementById('btnEdit').style.display !== 'none') return;
+
+  const pid = document.getElementById('pID').value;
+  const act = document.getElementById('logAction').value;
+  if(!act) return alert('Log description required');
+
+  showLoading(true);
+  const payload = {
+    mode: 'addProjectLog',
+    ProjectID: pid,
+    LogDate: document.getElementById('logDate').value.replace(/-/g, '/'),
+    ENG: document.getElementById('logEng').value,
+    Action: act
+  };
+
+  fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
+  .then(r => r.json())
+  .then(res => {
+    if(res.result === 'OK'){
+      document.getElementById('logAction').value = '';
+      loadProjectData(pid); 
+    } else {
+      showLoading(false);
+      alert('Error: ' + res.message);
+    }
+  });
+}
+
+function updateStatusColor(el) {
+  el.className = ''; 
+  if(el.value === 'Running') el.classList.add('running');
+  else if(el.value === 'Suspend') el.classList.add('suspend');
+  else el.classList.add('finish');
+}
+
+function showLoading(show) {
+  document.getElementById('loadingMask').style.display = show ? 'flex' : 'none';
+}
+</script>
+</body>
+</html>
