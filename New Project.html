@@ -51,12 +51,12 @@ input:disabled, select:disabled, textarea:disabled {
   min-height: 300px; display: flex; flex-direction: column; gap: 15px;
 }
 
-/* Log 輸入區 */
+/* Log 輸入區 (新增 Log) */
 .log-input-area { 
   display: grid; grid-template-columns: 150px 150px 1fr 100px; gap: 10px; 
   background: #162032; padding: 15px; border-radius: 10px; border: 1px dashed var(--border); 
   transition: 0.3s; 
-  align-items: start;
+  align-items: start; /* 讓按鈕靠上對齊 */
 }
 .log-input-area.locked { opacity: 0.3; pointer-events: none; }
 
@@ -68,18 +68,32 @@ input:disabled, select:disabled, textarea:disabled {
 .log-row { 
   display: grid; grid-template-columns: 120px 120px 1fr; gap: 15px; 
   background: #1e293b; padding: 15px; border-radius: 8px; border-left: 3px solid var(--border); 
-  align-items: start;
+  align-items: start; /* ★ 關鍵：靠上對齊，避免跑版 */
 }
 
 .log-date { color: var(--green); font-size: 14px; font-weight: bold; padding-top: 5px; }
 .log-eng { color: var(--blue); font-weight: bold; font-size: 14px; padding-top: 5px; }
 
-.log-desc-edit {
-  background: transparent; border: 1px solid transparent; color: #fff;
-  font-size: 15px; line-height: 1.5; resize: vertical; min-height: 24px; padding: 5px;
+/* ★ 修改：使用 DIV 取代 Textarea，支援自動長高 */
+.log-desc-div {
+  background: transparent; 
+  border: 1px solid transparent; 
+  color: #fff;
+  font-size: 15px; 
+  line-height: 1.6; 
+  padding: 5px;
+  min-height: 24px;
+  white-space: pre-wrap; /* 保留換行 */
+  word-break: break-word; /* 防止破版 */
+  outline: none;
 }
-.log-desc-edit:enabled {
-  background: var(--input-bg); border: 1px solid var(--border); color: #fff;
+
+/* 編輯模式下的樣式 */
+.log-desc-div.editing {
+  background: var(--input-bg); 
+  border: 1px solid var(--border); 
+  border-radius: 4px;
+  cursor: text;
 }
 
 /* === 底部按鈕區 === */
@@ -181,7 +195,7 @@ input:disabled, select:disabled, textarea:disabled {
 </div>
 
 <script>
-// ★★★ 請確認您的 GAS URL (EZ TECH) ★★★
+// ★★★ 請確認您的 PASC GAS URL ★★★
 const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
 
 let modifiedLogs = new Set();
@@ -209,9 +223,11 @@ window.onload = function() {
 };
 
 function setEditMode(editable) {
+  // 1. Master Info 欄位
   const inputs = document.querySelectorAll('.master-container input, .master-container select, .master-container textarea');
   inputs.forEach(el => el.disabled = !editable);
 
+  // 2. 新增 Log 區塊
   const logArea = document.getElementById('newLogArea');
   const logInputs = logArea.querySelectorAll('input, textarea, button');
   if (editable) {
@@ -222,9 +238,15 @@ function setEditMode(editable) {
     logInputs.forEach(el => el.disabled = true);
   }
 
-  const historyLogs = document.querySelectorAll('.log-desc-edit');
-  historyLogs.forEach(el => el.disabled = !editable);
+  // 3. ★ 歷史 Log 列表 (改用 DIV contenteditable 控制)
+  const historyLogs = document.querySelectorAll('.log-desc-div');
+  historyLogs.forEach(el => {
+    el.setAttribute('contenteditable', editable);
+    if(editable) el.classList.add('editing');
+    else el.classList.remove('editing');
+  });
 
+  // 4. 按鈕切換
   if (editable) {
     document.getElementById('btnEdit').style.display = 'none';
     document.getElementById('btnSave').style.display = 'flex';
@@ -267,11 +289,13 @@ function loadProjectData(pid) {
     const list = document.getElementById('logListBody');
     list.innerHTML = '';
     res.logs.forEach(l => {
+      // ★ 修改處：使用 div 取代 textarea
       list.innerHTML += `
         <div class="log-row">
           <div class="log-date">${l.LogDate}</div>
           <div class="log-eng">${l.ENG}</div>
-          <textarea class="log-desc-edit" data-lid="${l.LogID}" disabled onchange="markLogModified('${l.LogID}', this.value)">${l.Action}</textarea>
+          <div class="log-desc-div" data-lid="${l.LogID}" contenteditable="false" 
+               oninput="markLogModified('${l.LogID}', this.innerText)">${l.Action}</div>
         </div>
       `;
     });
@@ -308,8 +332,10 @@ async function saveMaster() {
     const res1 = await r1.json();
     if(res1.result !== 'OK') throw new Error(res1.message);
 
+    // ★ 修改：修正從 Set 讀取的方式
     if (!isNew && modifiedLogs.size > 0) {
       for (let logItem of modifiedLogs) {
+        // modifiedLogs 存的是物件 {LogID, Action}
         await fetch(API_URL, { 
           method: 'POST', 
           body: JSON.stringify({ 

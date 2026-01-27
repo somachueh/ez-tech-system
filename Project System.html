@@ -12,13 +12,52 @@ body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var
 
 /* 導航列 */
 .navbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding:20px 30px; background:var(--panel); border-radius:16px; border:1px solid var(--border); box-shadow:0 4px 20px rgba(0,0,0,0.3); }
-.nav-title { font-size:26px; font-weight:800; color:var(--blue); display:flex; align-items:center; gap:10px; }
 
-/* 按鈕 */
+/* ★★★ 修正重點：標題改回藍色 ★★★ */
+.nav-title { font-size:26px; font-weight:800; color:var(--blue); display:flex; align-items:center; gap:10px; }
+.nav-title i { color: var(--blue); }
+
+/* 按鈕通用樣式 */
 .btn { padding:10px 24px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; font-size:14px; transition:0.2s; display:flex; align-items:center; gap:8px; text-decoration:none;}
 .btn:hover { transform:translateY(-2px); filter:brightness(1.1); }
 .btn-add { background:var(--blue); color:#000; box-shadow:0 0 15px rgba(56,189,248,0.3); }
 .btn-exit { background:var(--border); color:#fff; }
+
+/* === 篩選按鈕群組樣式 === */
+.filter-group {
+  background: #0f172a; 
+  padding: 4px; 
+  border-radius: 8px; 
+  border: 1px solid var(--border); 
+  display: flex; 
+  gap: 5px; 
+  margin-right: 15px;
+}
+
+.btn-filter { 
+  padding: 8px 16px; 
+  border-radius: 6px; 
+  border: 1px solid transparent; 
+  background: transparent; 
+  color: var(--text-muted); 
+  cursor: pointer; 
+  font-weight: bold; 
+  font-size: 14px; 
+  transition: 0.2s; 
+}
+
+.btn-filter:hover { color: var(--text); }
+
+/* 三種狀態的激活顏色 */
+.btn-filter.active-open { 
+  background: var(--red); color: #fff; border-color: var(--red); 
+}
+.btn-filter.active-close { 
+  background: var(--green); color: #000; border-color: var(--green); 
+}
+.btn-filter.active-all { 
+  background: var(--blue); color: #000; border-color: var(--blue); 
+}
 
 /* === 表格容器樣式 === */
 .table-container {
@@ -26,7 +65,7 @@ body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var
   border-radius: 12px;
   border: 1px solid var(--border);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  overflow-x: auto; /* 讓小螢幕可以橫向捲動 */
+  overflow-x: auto; 
 }
 
 /* 表格本體 */
@@ -34,18 +73,20 @@ body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  white-space: nowrap; /* 防止內容自動換行導致版面擠壓 */
+  white-space: nowrap; 
 }
 
 .proj-table th, .proj-table td {
   padding: 15px 20px;
   border-bottom: 1px solid var(--border);
+  /* ★★★ 修正重點：表格內容強制藍色 ★★★ */
+  color: var(--blue); 
 }
 
-/* 表頭樣式 (維持橘色) */
+/* 表頭樣式 */
 .proj-table th {
   background: #1e293b; 
-  color: #fb923c; 
+  color: #fb923c; /* 表頭維持橘色 */
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.5px;
@@ -53,24 +94,15 @@ body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var
 
 /* 表格列滑過效果 */
 .proj-table tbody tr:hover {
-  background: rgba(56, 189, 248, 0.05); /* 淡淡的藍色光暈 */
+  background: rgba(56, 189, 248, 0.05); 
 }
 .proj-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* ★ 修改處：表格內容文字改為藍色 */
-.td-proj-name { 
-  font-weight: bold; 
-  color: #38bdf8; /* 改為藍色 */
-  font-size: 15px; 
-}
-
-.td-muted { 
-  color: #38bdf8; /* 改為藍色 */
-  font-size: 14px; 
-  opacity: 0.9;   /* 稍微透明一點點做出層次，但保持藍色系 */
-}
+/* 表格內容文字 */
+.td-proj-name { font-weight: bold; font-size: 15px; color: var(--blue); }
+.td-muted { font-size: 14px; opacity: 0.9; color: var(--blue); }
 
 /* 狀態標籤小藥丸 */
 .status-badge {
@@ -80,18 +112,19 @@ body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var
   font-weight: bold;
   text-transform: uppercase;
   display: inline-block;
+  color: #fff;
 }
 .st-Running { background: var(--green); color: #000; box-shadow: 0 0 5px rgba(74, 222, 128, 0.3); }
-.st-Suspend { background: var(--red); color: #fff; }
-.st-Finish { background: #94a3b8; color: #fff; }
+.st-Suspend { background: var(--red); }
+.st-Finish { background: #94a3b8; }
 
-/* ★ 修改處：編輯圖示改為藍色 */
+/* 編輯圖示 */
 .btn-edit-row {
-  color: #38bdf8; /* 改為藍色 */
   cursor: pointer;
   font-size: 16px;
   transition: 0.2s;
   padding: 5px;
+  color: var(--blue);
 }
 .btn-edit-row:hover { filter: brightness(1.2); transform: scale(1.1); }
 
@@ -103,7 +136,15 @@ body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var
 
 <div class="navbar">
   <div class="nav-title"><i class="fa-solid fa-diagram-project"></i> Project List</div>
-  <div style="display:flex; gap:15px;">
+  
+  <div style="display:flex; align-items: center; gap:15px;">
+    
+    <div class="filter-group">
+      <button class="btn-filter active-open" onclick="setFilter('OPEN', this)">Open</button>
+      <button class="btn-filter" onclick="setFilter('CLOSE', this)">Close</button>
+      <button class="btn-filter" onclick="setFilter('ALL', this)">All</button>
+    </div>
+
     <button class="btn btn-add" onclick="location.href='New Project.html'"><i class="fa-solid fa-plus"></i> New Project</button>
     <button class="btn btn-exit" onclick="location.href='index.html'"><i class="fa-solid fa-right-from-bracket"></i> Exit</button>
   </div>
@@ -135,22 +176,63 @@ body { margin:0; padding:20px; font-family:"Segoe UI",sans-serif; background:var
 // ★★★ 請確認您的 GAS URL (EZ TECH) ★★★
 const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
 
+let allProjects = []; 
+let currentFilter = 'OPEN'; 
+
 window.onload = loadProjects;
+
+function setFilter(type, btn) {
+  currentFilter = type;
+  
+  // 1. 移除所有按鈕的 active 樣式
+  document.querySelectorAll('.btn-filter').forEach(b => {
+      b.classList.remove('active-open', 'active-close', 'active-all');
+  });
+  
+  // 2. 根據點擊的類型添加對應的顏色樣式
+  if (type === 'OPEN') btn.classList.add('active-open');
+  else if (type === 'CLOSE') btn.classList.add('active-close');
+  else if (type === 'ALL') btn.classList.add('active-all');
+
+  // 3. 重新渲染表格
+  renderProjects();
+}
 
 function loadProjects() {
   fetch(API_URL, { method: 'POST', body: JSON.stringify({ mode: 'getProjectList' }) })
   .then(r => r.json())
   .then(res => {
-    const tbody = document.getElementById('projectListBody');
-    tbody.innerHTML = ''; // 清空 Loading
-    
     if(!res.list || res.list.length === 0){
+        allProjects = [];
+    } else {
+        allProjects = res.list;
+    }
+    renderProjects();
+  });
+}
+
+function renderProjects() {
+    const tbody = document.getElementById('projectListBody');
+    tbody.innerHTML = ''; 
+
+    const filteredList = allProjects.filter(p => {
+        const status = p.Status ? p.Status.toUpperCase() : '';
+        if (currentFilter === 'ALL') return true;
+        
+        // 定義 Close = Finish
+        const isClosed = (status === 'FINISH' || status === 'CLOSE' || status === 'COMPLETED');
+
+        if (currentFilter === 'CLOSE') return isClosed;
+        if (currentFilter === 'OPEN') return !isClosed; 
+        return true;
+    });
+
+    if(filteredList.length === 0){
       tbody.innerHTML = '<tr class="loading-row"><td colspan="8">No projects found.</td></tr>';
       return;
     }
 
-    res.list.forEach(p => {
-      // 簡化日期顯示 (只顯示 MM/dd，節省空間)
+    filteredList.forEach(p => {
       const shortStart = p.StartDate ? p.StartDate.substring(5) : '--/--';
       const shortDue = p.DueDate ? p.DueDate.substring(5) : '--/--';
 
@@ -172,7 +254,6 @@ function loadProjects() {
       
       tbody.innerHTML += row;
     });
-  });
 }
 </script>
 </body>

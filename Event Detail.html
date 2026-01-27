@@ -15,7 +15,8 @@
   --line-color: #334155;
   --btn-log-save: #38bdf8;
 }
-body { margin:0; padding:20px; font-family:"Segoe UI"; background:var(--bg); color:var(--text); display:flex; flex-direction:column; gap:20px; height:100vh; box-sizing:border-box; }
+/* ★ 修改 1: 移除 height: 100vh，讓頁面自然滾動，避免內容被壓縮 */
+body { margin:0; padding:20px; font-family:"Segoe UI"; background:var(--bg); color:var(--text); display:flex; flex-direction:column; gap:20px; min-height:100vh; box-sizing:border-box; }
 
 /* === Master Info Area === */
 .master-info {
@@ -43,7 +44,6 @@ body { margin:0; padding:20px; font-family:"Segoe UI"; background:var(--bg); col
   transition: all 0.2s;
 }
 
-/* 編輯模式下的樣式 */
 .editable-field.editing {
   background: #1e293b;
   border: 1px solid #475569;
@@ -53,62 +53,64 @@ body { margin:0; padding:20px; font-family:"Segoe UI"; background:var(--bg); col
   box-shadow: 0 0 5px rgba(56, 189, 248, 0.2);
 }
 
-/* === PRI 專屬樣式 (燈號下拉選單) === */
-select.pri-selector {
-  appearance: none;
-  text-align: center;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 6px;
-  border: 1px solid transparent;
-}
-select.pri-selector[disabled] {
-  opacity: 0.9;
-  cursor: default;
-  border-bottom: 1px solid var(--line-color);
-}
-
-/* 燈號顏色定義 */
-.pri-red { background-color: #ef4444 !important; color: white !important; }   /* Behind */
-.pri-green { background-color: #22c55e !important; color: white !important; } /* Keep */
-.pri-yellow { background-color: #eab308 !important; color: black !important; } /* Warning */
-.pri-gray { background-color: #64748b !important; color: white !important; }   /* End */
-
+/* === PRI 專屬樣式 === */
+select.pri-selector { appearance: none; text-align: center; font-weight: bold; cursor: pointer; border-radius: 6px; border: 1px solid transparent; }
+select.pri-selector[disabled] { opacity: 0.9; cursor: default; border-bottom: 1px solid var(--line-color); }
+.pri-red { background-color: #ef4444 !important; color: white !important; }
+.pri-green { background-color: #22c55e !important; color: white !important; }
+.pri-yellow { background-color: #eab308 !important; color: black !important; }
+.pri-gray { background-color: #64748b !important; color: white !important; }
 
 /* Status Text Display */
-.status-text {
-  font-weight: bold;
-  font-size: 16px;
-  padding: 5px;
-  border: 1px solid transparent; 
-  border-bottom: 1px solid var(--line-color);
-  color: var(--blue);
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-.status-text.editing {
-  cursor: pointer;
-  opacity: 1;
-  border: 1px solid #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-  border-radius: 4px;
+.status-text { font-weight: bold; font-size: 16px; padding: 5px; border: 1px solid transparent; border-bottom: 1px solid var(--line-color); color: var(--blue); cursor: not-allowed; opacity: 0.7; }
+.status-text.editing { cursor: pointer; opacity: 1; border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.1); border-radius: 4px; }
+
+/* === Log Area (重點修改區) === */
+/* ★ 修改 2: 移除 overflow-y: auto，讓 body 處理滾動 */
+.log-container { display:flex; flex-direction:column; gap:10px; padding-bottom: 20px; }
+
+.log-row { 
+  display:grid; 
+  grid-template-columns: 200px 1fr 100px; 
+  background:#1e293b; 
+  border-radius:8px; 
+  overflow:hidden; 
+  border:1px solid #334155; 
+  align-items: start; /* 靠上對齊 */
 }
 
-/* === Log Area === */
-.log-container { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
-.log-row { display:grid; grid-template-columns: 200px 1fr 100px; background:#1e293b; border-radius:8px; overflow:hidden; border:1px solid #334155; }
-.log-left { padding:15px; background:#0f172a; display:flex; flex-direction:column; gap:5px; text-align:center; font-size:14px; }
-
-/* 固定高度的 Log 輸入框 */
-.log-textarea {
-  width: 100%; height: 100%; min-height: 80px;
-  background: transparent; border: none; color: #e5e7eb;
-  font-size: 16px; line-height: 1.5; resize: none; padding: 15px;
-  box-sizing: border-box; font-family: inherit; outline: none;
+.log-left { 
+  padding:15px; background:#0f172a; display:flex; flex-direction:column; gap:5px; text-align:center; font-size:14px; height: 100%; 
 }
-.log-textarea.editing { background: #020617; border: 1px dashed #475569; }
 
-.log-right { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; background: #0f172a; }
+/* ★ 修改 3: 全新的 Log 內容 DIV 樣式，取代 textarea */
+.log-content-div {
+  width: 100%; 
+  min-height: 60px; /* 最小高度 */
+  background: transparent; 
+  border: 1px solid transparent; /* 預留邊框位置 */
+  color: #e5e7eb;
+  font-size: 16px; 
+  line-height: 1.6; 
+  padding: 15px;
+  box-sizing: border-box; 
+  font-family: inherit; 
+  outline: none;
+  white-space: pre-wrap; /* 關鍵：保留換行並自動折行 */
+  word-break: break-word; /* 防止長單字撐開 */
+}
+
+/* 編輯模式下的 DIV 樣式 */
+.log-content-div.editing { 
+  background: #020617; 
+  border: 1px dashed #475569;
+  cursor: text;
+}
+
+.log-right { 
+  display: flex; flex-direction: column; justify-content: flex-start; align-items: center; 
+  padding: 15px 10px; background: #0f172a; height: 100%;
+}
 .btn-log-save { background: var(--btn-log-save); color: #000; border: none; padding: 5px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; display: none; }
 
 /* === Action Buttons === */
@@ -129,20 +131,15 @@ select.pri-selector[disabled] {
 <body>
 
   <div class="master-info">
-    
     <div class="info-group" style="grid-column:span 5">
-      <label>Problem (Title)</label> 
-      <input id="mProblem" class="editable-field" readonly>
+      <label>Problem (Title)</label> <input id="mProblem" class="editable-field" readonly>
     </div>
-
     <div class="info-group"><label>Date</label><input id="mDate" class="editable-field" readonly></div>
     <div class="info-group"><label>Project</label><input id="mProject" class="editable-field" readonly></div>
     <div class="info-group"><label>Customer</label><input id="mCustomer" class="editable-field" readonly></div>
     <div class="info-group"><label>Tool ID</label><input id="mToolID" class="editable-field" readonly></div>
     <div class="info-group"><label>Tool Type</label><input id="mToolType" class="editable-field" readonly></div>
-    
     <div class="info-group"><label>CH</label><input id="mCH" class="editable-field" readonly></div>
-
     <div class="info-group">
       <label>PRI</label>
       <select id="mPRI" class="editable-field pri-selector" disabled onchange="updatePriColor()">
@@ -152,9 +149,7 @@ select.pri-selector[disabled] {
         <option value="End">End (Gray)</option>
       </select>
     </div>
-
     <div class="info-group"><label>ENG</label><input id="mENG" class="editable-field" readonly></div>
-    
     <div class="info-group">
       <label>Status</label>
       <div id="mStatusDisplay" class="status-text">...</div>
@@ -164,7 +159,6 @@ select.pri-selector[disabled] {
   <div class="action-bar">
     <button id="btnEdit" class="btn btn-edit" onclick="enableEditMode()">Edit</button>
     <button id="btnSave" class="btn btn-save" onclick="saveMasterChanges()">Save (Master)</button>
-    
     <button id="btnStatus" class="btn status-btn" onclick="toggleStatus()">Loading...</button>
     <button class="btn btn-exit" onclick="window.close()">Exit</button>
   </div>
@@ -204,15 +198,11 @@ fetch(`${API_URL}?mode=eventFull&eventId=${eid}`)
   currStatus = e.Status;
   updateStatusBtnUI();
 
-  // ★★★ 關鍵修改：Log 日期排序 (降序) ★★★
   res.logs.sort((a, b) => {
-      // 先比較 LogDate
       const dateA = new Date(a.LogDate);
       const dateB = new Date(b.LogDate);
       if (dateA > dateB) return -1;
       if (dateA < dateB) return 1;
-      
-      // 日期一樣則比較 CreateTime
       const timeA = new Date(a.CreateTime);
       const timeB = new Date(b.CreateTime);
       return timeB - timeA;
@@ -220,6 +210,7 @@ fetch(`${API_URL}?mode=eventFull&eventId=${eid}`)
 
   const logDiv = document.getElementById('logBody');
   res.logs.forEach(l => {
+    // ★ 修改 4: 將 textarea 改為 div，並設置 contenteditable="false"
     logDiv.innerHTML += `
       <div class="log-row">
         <div class="log-left">
@@ -227,22 +218,21 @@ fetch(`${API_URL}?mode=eventFull&eventId=${eid}`)
           <div style="color:#38bdf8">${l.ENG}</div>
         </div>
         <div class="log-center">
-          <textarea id="logtext_${l.LogID}" class="log-textarea" readonly>${l.Action}</textarea>
+          <div id="logtext_${l.LogID}" class="log-content-div" contenteditable="false">${l.Action}</div>
         </div>
         <div class="log-right">
           <button id="btnSaveLog_${l.LogID}" class="btn-log-save" onclick="saveSingleLog('${l.LogID}')">Save</button>
         </div>
       </div>`;
   });
+  // 移除舊版的 setTimeout autoResize，改用 DIV 自然排版
 });
 
 /* === 視覺：PRI 顏色變更邏輯 === */
 function updatePriColor() {
   const sel = document.getElementById('mPRI');
   const val = sel.value;
-  
   sel.classList.remove('pri-red', 'pri-green', 'pri-yellow', 'pri-gray');
-  
   if (val === 'High') sel.classList.add('pri-red');
   else if (val === 'Low') sel.classList.add('pri-green');
   else if (val === 'Midd') sel.classList.add('pri-yellow');
@@ -252,31 +242,23 @@ function updatePriColor() {
 /* === 核心：開啟編輯模式 === */
 function enableEditMode(){
   isEditing = true;
-
   document.getElementById('btnEdit').style.display = 'none';
   document.getElementById('btnSave').style.display = 'block';
 
   const inputs = document.querySelectorAll('.editable-field:not(#mPRI)'); 
-  inputs.forEach(input => {
-    input.removeAttribute('readonly');
-    input.classList.add('editing');
-  });
+  inputs.forEach(input => { input.removeAttribute('readonly'); input.classList.add('editing'); });
 
   const priSelect = document.getElementById('mPRI');
   priSelect.classList.add('editing'); 
-  if (currStatus === 'OPEN') {
-    priSelect.removeAttribute('disabled'); 
-  } else {
-    priSelect.setAttribute('disabled', true);
-  }
+  if (currStatus === 'OPEN') priSelect.removeAttribute('disabled'); 
+  else priSelect.setAttribute('disabled', true);
 
-  document.querySelectorAll('.log-textarea').forEach(area => {
-    area.removeAttribute('readonly');
-    area.classList.add('editing');
+  // ★ 修改 5: 啟用 DIV 的編輯功能
+  document.querySelectorAll('.log-content-div').forEach(div => {
+    div.setAttribute('contenteditable', 'true');
+    div.classList.add('editing');
   });
-  document.querySelectorAll('.btn-log-save').forEach(btn => {
-    btn.style.display = 'block';
-  });
+  document.querySelectorAll('.btn-log-save').forEach(btn => btn.style.display = 'block');
 
   document.getElementById('btnStatus').classList.add('active-mode');
   document.getElementById('mStatusDisplay').classList.add('editing');
@@ -285,14 +267,10 @@ function enableEditMode(){
 /* === 儲存主檔 === */
 function saveMasterChanges(){
   const btnSave = document.getElementById('btnSave');
-  btnSave.innerText = 'Saving...';
-  btnSave.disabled = true;
-
+  btnSave.innerText = 'Saving...'; btnSave.disabled = true;
   const priVal = document.getElementById('mPRI').value;
-
   const payload = {
-    mode: 'updateEvent',
-    EventID: eid,
+    mode: 'updateEvent', EventID: eid,
     Problem: document.getElementById('mProblem').value,
     Date: document.getElementById('mDate').value,
     Project: document.getElementById('mProject').value,
@@ -300,27 +278,19 @@ function saveMasterChanges(){
     CustomerToolID: document.getElementById('mToolID').value,
     ToolType: document.getElementById('mToolType').value,
     Chamber: document.getElementById('mCH').value,
-    PRI: priVal,
-    ENG: document.getElementById('mENG').value
+    PRI: priVal, ENG: document.getElementById('mENG').value
   };
-
   fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) })
-  .then(r => r.json())
-  .then(res => {
-    if(res.result === 'OK'){
-      alert('✅ Master Info Updated');
-      location.reload(); 
-    } else {
-      alert('Failed: ' + res.message);
-      btnSave.innerText = 'Save (Master)';
-      btnSave.disabled = false;
-    }
+  .then(r => r.json()).then(res => {
+    if(res.result === 'OK'){ alert('✅ Master Info Updated'); location.reload(); } 
+    else { alert('Failed: ' + res.message); btnSave.innerText = 'Save (Master)'; btnSave.disabled = false; }
   });
 }
 
 /* === 儲存 Log === */
 function saveSingleLog(logId){
-  const txt = document.getElementById(`logtext_${logId}`).value;
+  // ★ 修改 6: 從 DIV 的 innerText 獲取內容
+  const txt = document.getElementById(`logtext_${logId}`).innerText;
   const btn = document.getElementById(`btnSaveLog_${logId}`);
   btn.innerText = '...'; btn.disabled = true;
 
@@ -333,40 +303,24 @@ function saveSingleLog(logId){
 
 /* === 狀態切換邏輯 (連動 PRI) === */
 function toggleStatus(){
-  if(!isEditing){
-    alert('🔒 Please click "Edit" first to change status.');
-    return;
-  }
-
+  if(!isEditing){ alert('🔒 Please click "Edit" first to change status.'); return; }
   const next = currStatus==='OPEN'?'CLOSE':'OPEN';
   if(!confirm(`Change status to ${next}?`)) return;
-  
-  const btn = document.getElementById('btnStatus');
-  btn.innerText = '...';
-  
+  const btn = document.getElementById('btnStatus'); btn.innerText = '...';
   fetch(API_URL, {method:'POST', body:JSON.stringify({mode:'updateStatus', EventID:eid, Status:next})})
   .then(r=>r.json()).then(res=>{
     if(res.result==='OK'){ 
-      currStatus = next; 
-      updateStatusBtnUI(); 
-      document.getElementById('mStatusDisplay').innerText = next;
-
+      currStatus = next; updateStatusBtnUI(); document.getElementById('mStatusDisplay').innerText = next;
       const priSelect = document.getElementById('mPRI');
-      if (next === 'CLOSE') {
-        priSelect.value = 'End';
-        priSelect.setAttribute('disabled', true);
-      } else {
-        priSelect.value = 'Keep';
-        priSelect.removeAttribute('disabled');
-      }
+      if (next === 'CLOSE') { priSelect.value = 'End'; priSelect.setAttribute('disabled', true); } 
+      else { priSelect.value = 'Keep'; priSelect.removeAttribute('disabled'); }
       updatePriColor(); 
     }
   });
 }
 
 function updateStatusBtnUI(){
-  const b = document.getElementById('btnStatus');
-  b.innerText = currStatus;
+  const b = document.getElementById('btnStatus'); b.innerText = currStatus;
   const baseClass = isEditing ? 'btn status-btn active-mode' : 'btn status-btn';
   b.className = `${baseClass} ${currStatus==='OPEN'?'status-open':'status-close'}`;
 }

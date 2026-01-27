@@ -11,6 +11,7 @@
   --blue: #38bdf8; 
   --border: rgba(148,163,184,.18); 
   --panel: #162235; 
+  --yellow: #eab308; /* EZ TECH 標準黃色 */
 }
 
 body { 
@@ -87,46 +88,45 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 8px rgba(56, 189, 248, 
 /* === 精準配色 Badge 樣式 === */
 .status-badge {
   display: inline-block;
-  padding: 6px 0;          /* 上下 padding */
-  width: 70px;             /* 固定寬度，讓排版更整齊，像按鈕 */
+  padding: 6px 0;           
+  width: 70px;              
   font-size: 13px;
-  font-weight: 700;        /* 粗體 */
-  color: #ffffff;          /* 白字 */
-  border-radius: 6px;      /* 圓角 */
+  font-weight: 700;         
+  color: #ffffff;           
+  border-radius: 6px;       
   text-align: center;
   line-height: 1.4;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* 增加立體感 */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
 }
 
-/* 色階校正 (Color Correction):
-   依據 Event List 截圖採樣
-*/
+/* 色階校正 */
 
-/* 紅色: High, Open */
-/* 使用鮮豔的紅，而非粉紅 */
+/* 紅色: High, Open (白字) */
 .bg-red { 
   background-color: #ff4d4f; 
   border: 1px solid #ff4d4f;
+  color: #fff;
 }
 
-/* 綠色: Low, Close */
-/* 使用飽和的翠綠，類似 Vuexy/Element 綠 */
+/* 綠色: Low, Close (白字) */
 .bg-green { 
   background-color: #00c853; 
   border: 1px solid #00c853;
+  color: #fff;
 }
 
-/* 橘色: Midd */
-.bg-orange { 
-  background-color: #ff9800; 
-  border: 1px solid #ff9800;
+/* ★ 修改處：黃色 Midd (黃底黑字) */
+.bg-yellow { 
+  background-color: var(--yellow); /* 使用 EZ TECH 標準黃 #eab308 */
+  border: 1px solid var(--yellow);
+  color: #000; /* ★ 修正：黑字 */
 }
 
-/* 藍灰色: End */
-/* 這是最關鍵的修改，使用 Blue Grey 模擬截圖中的 "End" 質感 */
+/* 藍灰色: End (白字) */
 .bg-grey { 
   background-color: #607d8b; 
   border: 1px solid #607d8b;
+  color: #fff;
 }
 
 </style>
@@ -181,6 +181,7 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 8px rgba(56, 189, 248, 
 </div>
 
 <script>
+// ★★★ 請務必確認您的 GAS URL ★★★
 const API_URL = 'https://script.google.com/macros/s/AKfycbw3f4ch9YxN47QQ_Sa9vuTKk5-Y9yLJumm4wkozjWkxcMqiW9fAhLBxI2Lvd64DRrqn/exec';
 
 function handleEnter(e){
@@ -230,14 +231,14 @@ function doSearch(){
 // === Status 標籤邏輯 ===
 function getStatusBadgeHtml(status) {
   var s = String(status).toUpperCase().trim();
-  var cssClass = "bg-grey"; // 預設
+  var cssClass = "bg-grey"; 
 
   if (s === "OPEN") {
-    cssClass = "bg-red";    // OPEN = 紅色
+    cssClass = "bg-red";    
   } else if (s === "CLOSE" || s === "CLOSED") {
-    cssClass = "bg-green";  // CLOSE = 綠色
+    cssClass = "bg-green";  
   } else if (s === "END") {
-    cssClass = "bg-grey";   // END = 藍灰色
+    cssClass = "bg-grey";   
   }
   return '<span class="status-badge ' + cssClass + '">' + status + '</span>';
 }
@@ -245,16 +246,16 @@ function getStatusBadgeHtml(status) {
 // === PRI 標籤邏輯 ===
 function getPriBadgeHtml(priority) {
   var p = String(priority).toUpperCase().trim();
-  var cssClass = "bg-grey"; // 預設
+  var cssClass = "bg-grey"; 
 
   if (p === "HIGH") {
-    cssClass = "bg-red";    // HIGH = 紅色
+    cssClass = "bg-red";    
   } else if (p === "MIDD" || p === "MID" || p === "MEDIUM") {
-    cssClass = "bg-orange"; // MIDD = 橘色
+    cssClass = "bg-yellow"; // ★ 修改：使用 bg-yellow (黃底黑字)
   } else if (p === "LOW") {
-    cssClass = "bg-green";  // LOW = 綠色
+    cssClass = "bg-green";  
   } else if (p === "END") {
-    cssClass = "bg-grey";   // END = 藍灰色
+    cssClass = "bg-grey";   
   }
   return '<span class="status-badge ' + cssClass + '">' + priority + '</span>';
 }
