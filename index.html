@@ -13,7 +13,7 @@ body{
   font-family:"Segoe UI","Microsoft JhengHei",Arial;
   background:radial-gradient(circle at top,#1c2433,#070b14);
   color:#e6eef6;
-  overflow-x: hidden; /* 防止視窗滑出時產生捲軸 */
+  overflow-x: hidden;
 }
 
 /* LOGIN */
@@ -177,13 +177,13 @@ footer div{font-weight:600;}
 
 /* === 甘特圖嵌入視窗 (Iframe) 樣式 === */
 #gantt-overlay {
-  display: none; /* 預設隱藏 */
+  display: none; 
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #070b14; /* 與背景色融合 */
+  background-color: #070b14; 
   z-index: 9999;
   flex-direction: column;
 }
@@ -227,7 +227,7 @@ footer div{font-weight:600;}
   flex: 1;
   width: 100%;
   border: none;
-  background: #f0f2f5; /* 甘特圖的淺色背景 */
+  background: #f0f2f5; 
 }
 </style>
 </head>
@@ -321,14 +321,13 @@ footer div{font-weight:600;}
 <script>
 // === 請在這裡貼上您的 Google Apps Script 網址 ===
 const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyhGE88lHuVtx8OdT7i5y3A_Vzn0AHT2FbFkC-otHkTX2EgqnuL0SXevjRMN62fcpX6/exec"; 
-// 例如: "https://script.google.com/macros/s/AKfycby..../exec"
 
-// === 甘特圖視窗控制與雙向通訊機制 ===
+let ganttWindow = null; // 用來儲存內部真實的 Google iframe 位址
+
 function openGantt() {
   const frame = document.getElementById('gantt-frame');
   const overlay = document.getElementById('gantt-overlay');
   
-  // 如果沒有載入過，才賦予網址，節省資源
   if (!frame.src || frame.src === "about:blank" || frame.src === window.location.href) {
     frame.src = GOOGLE_APP_URL;
   }
@@ -337,34 +336,35 @@ function openGantt() {
 }
 
 function closeGantt() {
-  const frame = document.getElementById('gantt-frame');
   const overlay = document.getElementById('gantt-overlay');
+  const frame = document.getElementById('gantt-frame');
   
-  if (frame && frame.contentWindow) {
-    // 傳送指令給內部的甘特圖，詢問目前狀態
-    frame.contentWindow.postMessage('requestClose', '*');
+  if (ganttWindow) {
+    // 透過儲存的真實位址，將指令精準傳達給內部的甘特圖
+    ganttWindow.postMessage('requestClose', '*');
     
-    // 安全機制：如果 500 毫秒內內部甘特圖沒有回應，則強制關閉並重置網址
+    // 如果 500ms 後內部沒回應 (例如網路異常或被阻擋)，則強制重置並關閉
     window.closeFallback = setTimeout(() => {
       overlay.style.display = "none";
-      frame.src = GOOGLE_APP_URL; // 強制重置回圖四狀態
+      frame.src = GOOGLE_APP_URL; 
     }, 500);
   } else {
-    // 異常狀態下直接關閉
+    // 如果一開始就沒抓到通訊，直接關閉
     overlay.style.display = "none";
   }
 }
 
-// 監聽來自內部甘特圖的回應
+// === 接收內部甘特圖的回應 ===
 window.addEventListener('message', function(event) {
-  // 驗證訊息內容
-  if (event.data === 'closeOverlay') {
-    // 甘特圖說它已經在「清單頁面 (圖四)」，可以直接關閉
+  if (event.data === 'gantt_ready') {
+    // 成功抓取真實位址，破解 Google 雙層 Iframe 問題
+    ganttWindow = event.source;
+  } else if (event.data === 'closeOverlay') {
+    // 內部表示：我已經在圖四了，可以直接關閉外層視窗
     clearTimeout(window.closeFallback);
     document.getElementById('gantt-overlay').style.display = "none";
   } else if (event.data === 'wentBack') {
-    // 甘特圖說它正在「編輯頁面 (圖一/圖三)」，並且已經自己退回圖四了
-    // 外層視窗不需要關閉，保留顯示即可
+    // 內部表示：我剛剛退回圖四了，請不要關閉外層視窗
     clearTimeout(window.closeFallback);
   }
 });
