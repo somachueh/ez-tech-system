@@ -13,6 +13,7 @@ body{
   font-family:"Segoe UI","Microsoft JhengHei",Arial;
   background:radial-gradient(circle at top,#1c2433,#070b14);
   color:#e6eef6;
+  overflow-x: hidden; /* 防止視窗滑出時產生捲軸 */
 }
 
 /* LOGIN */
@@ -43,7 +44,7 @@ body{
   border:none;
   background:#060b18;
   color:#fff;
-  box-sizing: border-box; /* 確保 padding 不會撐破寬度 */
+  box-sizing: border-box;
 }
 .login-box button{
   width:100%;
@@ -130,64 +131,31 @@ body{
   border-radius:14px;
 }
 
-/* === 呼吸燈動畫定義 === */
+/* === 呼吸燈動畫 === */
 @keyframes breathe-blue {
-  0%, 100% { 
-    box-shadow: 0 0 5px rgba(77, 166, 255, 0.2); 
-    border-color: rgba(77, 166, 255, 0.3); 
-  }
-  50% { 
-    box-shadow: 0 0 25px rgba(77, 166, 255, 0.7), inset 0 0 10px rgba(77, 166, 255, 0.2); 
-    border-color: #4da6ff; 
-  }
+  0%, 100% { box-shadow: 0 0 5px rgba(77, 166, 255, 0.2); border-color: rgba(77, 166, 255, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(77, 166, 255, 0.7), inset 0 0 10px rgba(77, 166, 255, 0.2); border-color: #4da6ff; }
 }
-
 @keyframes breathe-orange {
-  0%, 100% { 
-    box-shadow: 0 0 5px rgba(255, 159, 67, 0.2); 
-    border-color: rgba(255, 159, 67, 0.3); 
-  }
-  50% { 
-    box-shadow: 0 0 25px rgba(255, 159, 67, 0.7), inset 0 0 10px rgba(255, 159, 67, 0.2); 
-    border-color: #ff9f43; 
-  }
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 159, 67, 0.2); border-color: rgba(255, 159, 67, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(255, 159, 67, 0.7), inset 0 0 10px rgba(255, 159, 67, 0.2); border-color: #ff9f43; }
 }
-
 @keyframes breathe-gray {
-  0%, 100% { 
-    box-shadow: 0 0 5px rgba(207, 214, 228, 0.2); 
-    border-color: rgba(207, 214, 228, 0.3); 
-  }
-  50% { 
-    box-shadow: 0 0 25px rgba(207, 214, 228, 0.6), inset 0 0 10px rgba(207, 214, 228, 0.1); 
-    border-color: #cfd6e4; 
-  }
+  0%, 100% { box-shadow: 0 0 5px rgba(207, 214, 228, 0.2); border-color: rgba(207, 214, 228, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(207, 214, 228, 0.6), inset 0 0 10px rgba(207, 214, 228, 0.1); border-color: #cfd6e4; }
 }
 
-/* COLOR GROUP & HOVER EFFECTS */
 .blue{color:#4da6ff;border-left:5px solid #4da6ff;}
 .blue i{background:rgba(77,166,255,.18);color:#4da6ff;}
-.blue:hover {
-  animation: breathe-blue 2s infinite ease-in-out;
-  transform: translateY(-5px);
-  z-index: 10;
-}
+.blue:hover { animation: breathe-blue 2s infinite ease-in-out; transform: translateY(-5px); z-index: 10; }
 
 .orange{color:#ff9f43;border-left:5px solid #ff9f43;}
 .orange i{background:rgba(255,159,67,.22);color:#ff9f43;}
-.orange:hover {
-  animation: breathe-orange 2s infinite ease-in-out;
-  transform: translateY(-5px);
-  z-index: 10;
-}
+.orange:hover { animation: breathe-orange 2s infinite ease-in-out; transform: translateY(-5px); z-index: 10; }
 
 .gray{color:#cfd6e4;border-left:5px solid #cfd6e4;}
 .gray i{background:rgba(207,214,228,.18);color:#cfd6e4;}
-.gray:hover {
-  animation: breathe-gray 2s infinite ease-in-out;
-  transform: translateY(-5px);
-  z-index: 10;
-}
+.gray:hover { animation: breathe-gray 2s infinite ease-in-out; transform: translateY(-5px); z-index: 10; }
 
 footer{
   display:flex;
@@ -205,6 +173,61 @@ footer div{font-weight:600;}
   border-radius:12px;
   cursor:pointer;
   font-weight:700;
+}
+
+/* === 甘特圖嵌入視窗 (Iframe) 樣式 === */
+#gantt-overlay {
+  display: none; /* 預設隱藏 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #070b14; /* 與背景色融合 */
+  z-index: 9999;
+  flex-direction: column;
+}
+
+.overlay-header {
+  height: 60px;
+  background: linear-gradient(90deg, #162033, #0b1220);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  border-bottom: 1px solid rgba(77, 166, 255, 0.3);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.overlay-title {
+  color: #37c6ff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.close-btn {
+  background: rgba(255, 90, 90, 0.1);
+  color: #ff5a5a;
+  border: 1px solid rgba(255, 90, 90, 0.3);
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: inherit;
+  transition: all 0.3s;
+}
+.close-btn:hover { 
+  background: #ff5a5a; 
+  color: white; 
+  box-shadow: 0 0 15px rgba(255, 90, 90, 0.5);
+}
+
+.gantt-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #f0f2f5; /* 甘特圖的淺色背景 */
 }
 </style>
 </head>
@@ -264,8 +287,9 @@ footer div{font-weight:600;}
   <div class="card blue" onclick="location.href='parts-list.html'">
     <i class="fa-solid fa-screwdriver-wrench"></i>Parts List
   </div>
-  <div class="card orange" onclick="location.href='employee-info.html'">
-    <i class="fa-solid fa-id-card"></i>員工資訊網
+  
+  <div class="card orange" onclick="openGantt()">
+    <i class="fa-solid fa-chart-gantt"></i>Gantt Chart
   </div>
   <div class="card gray" onclick="location.href='pms.html'">
     <i class="fa-solid fa-heart-pulse"></i>PMS 保養管理
@@ -281,9 +305,41 @@ footer div{font-weight:600;}
 </div>
 </div>
 
-<script>
-// === 登入邏輯修改開始 ===
+<div id="gantt-overlay">
+  <div class="overlay-header">
+    <div class="overlay-title">
+      <i class="fa-solid fa-chart-gantt" style="margin-right:10px;"></i>Project Gantt Chart System
+    </div>
+    <button class="close-btn" onclick="closeGantt()">
+      <i class="fa-solid fa-xmark"></i> 關閉返回
+    </button>
+  </div>
+  <iframe id="gantt-frame" class="gantt-frame" src=""></iframe>
+</div>
 
+<script>
+// === 請在這裡貼上您的 Google Apps Script 網址 ===
+const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyhGE88lHuVtx8OdT7i5y3A_Vzn0AHT2FbFkC-otHkTX2EgqnuL0SXevjRMN62fcpX6/exec"; 
+// 例如: "https://script.google.com/macros/s/AKfycby..../exec"
+
+// === 甘特圖視窗控制 ===
+function openGantt() {
+  const frame = document.getElementById('gantt-frame');
+  const overlay = document.getElementById('gantt-overlay');
+  
+  // 第一次開啟時才載入網址，避免浪費流量
+  if (!frame.src || frame.src === "about:blank" || frame.src === window.location.href) {
+    frame.src = GOOGLE_APP_URL;
+  }
+  
+  overlay.style.display = "flex";
+}
+
+function closeGantt() {
+  document.getElementById('gantt-overlay').style.display = "none";
+}
+
+// === 原本的登入邏輯 (保持不變) ===
 function checkSession(){
   const u = localStorage.getItem("EZTECH_USER");
   const loginView = document.getElementById("loginView");
@@ -291,12 +347,10 @@ function checkSession(){
   const loginUser = document.getElementById("loginUser");
 
   if(u){
-    // 已登入
     loginView.style.display = "none";
     systemView.style.display = "block";
     loginUser.innerText = "Engineer " + u;
   } else {
-    // 未登入
     loginView.style.display = "flex";
     systemView.style.display = "none";
   }
@@ -305,8 +359,6 @@ function checkSession(){
 function login(){
   const idInput = document.getElementById("userId").value.trim();
   const passInput = document.getElementById("password").value.trim();
-
-  // 定義正確的帳號密碼 (這裡寫小寫，稍後會將輸入轉小寫比對)
   const validId = "admin";
   const validPass = "ez1234";
 
@@ -315,31 +367,24 @@ function login(){
     return;
   }
 
-  // 驗證 (不分大小寫)
   if(idInput.toLowerCase() === validId && passInput.toLowerCase() === validPass){
-    // 登入成功
-    localStorage.setItem("EZTECH_USER", idInput); // 儲存使用者輸入的原始大小寫(或你想存admin也可以)
+    localStorage.setItem("EZTECH_USER", idInput);
     checkSession();
   } else {
-    // 登入失敗
     alert("❌ Login Failed: Invalid User ID or Password");
-    document.getElementById("password").value = ""; // 清空密碼欄位
+    document.getElementById("password").value = "";
   }
 }
 
 function logout(){
   localStorage.removeItem("EZTECH_USER");
   checkSession();
-  // 登出後清空輸入框，體驗較佳
   document.getElementById("userId").value = "";
   document.getElementById("password").value = "";
 }
 
-// 支援按 Enter 鍵登入
 document.getElementById("password").addEventListener("keypress", function(event) {
-  if (event.key === "Enter") {
-    login();
-  }
+  if (event.key === "Enter") login();
 });
 
 checkSession();
