@@ -291,6 +291,7 @@ footer div{font-weight:600;}
   <div class="card orange" onclick="openGantt()">
     <i class="fa-solid fa-chart-gantt"></i>Gantt Chart
   </div>
+
   <div class="card gray" onclick="location.href='pms.html'">
     <i class="fa-solid fa-heart-pulse"></i>PMS 保養管理
   </div>
@@ -322,12 +323,12 @@ footer div{font-weight:600;}
 const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyhGE88lHuVtx8OdT7i5y3A_Vzn0AHT2FbFkC-otHkTX2EgqnuL0SXevjRMN62fcpX6/exec"; 
 // 例如: "https://script.google.com/macros/s/AKfycby..../exec"
 
-// === 甘特圖視窗控制 ===
+// === 甘特圖視窗控制與雙向通訊機制 ===
 function openGantt() {
   const frame = document.getElementById('gantt-frame');
   const overlay = document.getElementById('gantt-overlay');
   
-  // 第一次開啟時才載入網址，避免浪費流量
+  // 如果沒有載入過，才賦予網址，節省資源
   if (!frame.src || frame.src === "about:blank" || frame.src === window.location.href) {
     frame.src = GOOGLE_APP_URL;
   }
@@ -336,8 +337,37 @@ function openGantt() {
 }
 
 function closeGantt() {
-  document.getElementById('gantt-overlay').style.display = "none";
+  const frame = document.getElementById('gantt-frame');
+  const overlay = document.getElementById('gantt-overlay');
+  
+  if (frame && frame.contentWindow) {
+    // 傳送指令給內部的甘特圖，詢問目前狀態
+    frame.contentWindow.postMessage('requestClose', '*');
+    
+    // 安全機制：如果 500 毫秒內內部甘特圖沒有回應，則強制關閉並重置網址
+    window.closeFallback = setTimeout(() => {
+      overlay.style.display = "none";
+      frame.src = GOOGLE_APP_URL; // 強制重置回圖四狀態
+    }, 500);
+  } else {
+    // 異常狀態下直接關閉
+    overlay.style.display = "none";
+  }
 }
+
+// 監聽來自內部甘特圖的回應
+window.addEventListener('message', function(event) {
+  // 驗證訊息內容
+  if (event.data === 'closeOverlay') {
+    // 甘特圖說它已經在「清單頁面 (圖四)」，可以直接關閉
+    clearTimeout(window.closeFallback);
+    document.getElementById('gantt-overlay').style.display = "none";
+  } else if (event.data === 'wentBack') {
+    // 甘特圖說它正在「編輯頁面 (圖一/圖三)」，並且已經自己退回圖四了
+    // 外層視窗不需要關閉，保留顯示即可
+    clearTimeout(window.closeFallback);
+  }
+});
 
 // === 原本的登入邏輯 (保持不變) ===
 function checkSession(){
