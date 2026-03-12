@@ -100,6 +100,7 @@ body{
   opacity:.85;
 }
 
+/* === 儀表板排版 (3欄網格) === */
 .dashboard{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -175,7 +176,7 @@ footer div{font-weight:600;}
   font-weight:700;
 }
 
-/* === 甘特圖嵌入視窗 (Iframe) 樣式 === */
+/* === 甘特圖嵌入視窗 (Iframe) 樣式 (恢復) === */
 #gantt-overlay {
   display: none; 
   position: fixed;
@@ -260,7 +261,7 @@ footer div{font-weight:600;}
   <div class="card orange" onclick="location.href='Daily Report.html?day=today'">
     <i class="fa-solid fa-calendar-day"></i>Today's Report
   </div>
-  <div class="card gray" onclick="location.href='engineer-modify.html'">
+  <div class="card gray" onclick="location.href='#'">
     <i class="fa-solid fa-user-gear"></i>Engineer Modify
   </div>
 
@@ -270,30 +271,17 @@ footer div{font-weight:600;}
   <div class="card orange" onclick="location.href='Daily Report.html?day=yesterday'">
     <i class="fa-solid fa-rotate-left"></i>Yesterday's Report
   </div>
-  <div class="card gray" onclick="location.href='machine-modify.html'">
+  <div class="card gray" onclick="location.href='#'">
     <i class="fa-solid fa-robot"></i>Machine Modify
   </div>
 
-  <div class="card blue" onclick="location.href='company-list.html'">
-    <i class="fa-solid fa-building"></i>Company List
+  <div class="card blue" onclick="openGantt()"> <i class="fa-solid fa-chart-gantt"></i>Gantt Chart
   </div>
   <div class="card orange" onclick="location.href='Event Search.html'">
     <i class="fa-solid fa-magnifying-glass"></i>Event Search
   </div>
-  <div class="card gray" onclick="location.href='pump-system.html'">
-    <i class="fa-solid fa-water"></i>Pump 管理系統
-  </div>
-
-  <div class="card blue" onclick="location.href='parts-list.html'">
-    <i class="fa-solid fa-screwdriver-wrench"></i>Parts List
-  </div>
-  
-  <div class="card orange" onclick="openGantt()">
-    <i class="fa-solid fa-chart-gantt"></i>Gantt Chart
-  </div>
-
-  <div class="card gray" onclick="location.href='pms.html'">
-    <i class="fa-solid fa-heart-pulse"></i>PMS 保養管理
+  <div class="card gray" onclick="location.href='E Learning.html'">
+    <i class="fa-solid fa-graduation-cap"></i>E Learning
   </div>
 
 </main>
@@ -322,8 +310,9 @@ footer div{font-weight:600;}
 // === 請在這裡貼上您的 Google Apps Script 網址 ===
 const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbyhGE88lHuVtx8OdT7i5y3A_Vzn0AHT2FbFkC-otHkTX2EgqnuL0SXevjRMN62fcpX6/exec"; 
 
-let ganttWindow = null; // 用來儲存內部真實的 Google iframe 位址
+let ganttWindow = null; 
 
+// === 恢復甘特圖相關 JS ===
 function openGantt() {
   const frame = document.getElementById('gantt-frame');
   const overlay = document.getElementById('gantt-overlay');
@@ -340,36 +329,29 @@ function closeGantt() {
   const frame = document.getElementById('gantt-frame');
   
   if (ganttWindow) {
-    // 透過儲存的真實位址，將指令精準傳達給內部的甘特圖
     ganttWindow.postMessage('requestClose', '*');
     
-    // 如果 500ms 後內部沒回應 (例如網路異常或被阻擋)，則強制重置並關閉
     window.closeFallback = setTimeout(() => {
       overlay.style.display = "none";
       frame.src = GOOGLE_APP_URL; 
     }, 500);
   } else {
-    // 如果一開始就沒抓到通訊，直接關閉
     overlay.style.display = "none";
   }
 }
 
-// === 接收內部甘特圖的回應 ===
 window.addEventListener('message', function(event) {
   if (event.data === 'gantt_ready') {
-    // 成功抓取真實位址，破解 Google 雙層 Iframe 問題
     ganttWindow = event.source;
   } else if (event.data === 'closeOverlay') {
-    // 內部表示：我已經在圖四了，可以直接關閉外層視窗
     clearTimeout(window.closeFallback);
     document.getElementById('gantt-overlay').style.display = "none";
   } else if (event.data === 'wentBack') {
-    // 內部表示：我剛剛退回圖四了，請不要關閉外層視窗
     clearTimeout(window.closeFallback);
   }
 });
 
-// === 原本的登入邏輯 (保持不變) ===
+// === 登入邏輯 ===
 function checkSession(){
   const u = localStorage.getItem("EZTECH_USER");
   const loginView = document.getElementById("loginView");
@@ -422,6 +404,3 @@ checkSession();
 
 </body>
 </html>
-
-
-

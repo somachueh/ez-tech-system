@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E Learning | EZ TECH</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* === EZ TECH 風格定義 === */
+:root { 
+  --bg: #020617; 
+  --panel: #0f172a; 
+  --card-bg: #1e293b;
+  --border: #334155; 
+  --text: #e5e7eb; 
+  --text-muted: #94a3b8; 
+  --blue: #38bdf8; 
+  --green: #4ade80; 
+  --badge-green: #22c55e;
+  --badge-orange: #f59e0b;
+  --badge-gray: #475569;
+  /* 紅色按鈕配色 (圖二/圖三採樣) */
+  --red-btn-bg: #420000;      /* Normal 背景: 深紅 */
+  --red-btn-text: #ff5a5a;    /* Normal 文字: 淡紅 */
+  --red-btn-hover: #ff4d4f;   /* Hover 背景: 亮紅 */
+}
+body { margin:0; padding:30px; font-family:"Segoe UI",sans-serif; background:var(--bg); color:var(--text); }
+
+/* === 頭部區塊 (Header Area) - ★修正排版以容納返回按鈕★ === */
+.header-area { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: flex-start; /* 靠上對齊，讓標題與按鈕群組水平一致 */
+  margin-bottom: 20px; 
+}
+
+/* 標題區 (左) */
+.title-group { display: flex; flex-direction: column; }
+.page-title { margin: 0; font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 1px; }
+.page-subtitle { margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted); }
+
+/* 用戶與按鈕區 (右) */
+.action-group { 
+  display: flex; 
+  align-items: center; 
+  gap: 20px; /* 用戶資訊與關閉按鈕的間距 */
+}
+
+/* 用戶資訊樣式 */
+.user-profile { display: flex; align-items: center; gap: 15px; }
+.avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--blue); color: #000; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; }
+.user-info { display: flex; flex-direction: column; }
+.user-name { font-weight: bold; font-size: 15px; color: #fff; }
+.user-role { font-size: 13px; color: var(--text-muted); }
+
+/* ★★★ 新增：紅色關閉返回按鈕樣式 (圖二/圖三精準還原) ★★★ */
+.btn-back-main {
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  transition: all 0.3s ease; /* 平滑過渡動畫 */
+  
+  /* === 圖二：滑鼠未滑過狀態 (Normal) === */
+  background: var(--red-btn-bg); /* 深紅背景 */
+  color: var(--red-btn-text);    /* 淡紅文字 */
+  border-color: rgba(255, 90, 90, 0.15); /* 淡淡的紅邊框，增加質感 */
+}
+
+.btn-back-main i {
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* === 圖三：滑鼠滑過狀態 (Hover) === */
+.btn-back-main:hover {
+  background: var(--red-btn-hover); /* 亮紅背景 */
+  color: #ffffff;                  /* 白色文字 */
+  border-color: var(--red-btn-hover);
+  
+  /* 微上移與科技感發光特效 */
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px rgba(255, 77, 79, 0.6), inset 0 0 10px rgba(255, 77, 79, 0.3);
+}
+
+.btn-back-main:active {
+  transform: translateY(-1px) scale(0.98); /* 點擊時的下壓反饋 */
+}
+
+
+/* === 導航標籤 (Tabs) === */
+.tabs-container { display: flex; gap: 30px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+.tab-btn { 
+  background: transparent; border: none; color: var(--text-muted); font-size: 16px; font-weight: bold; 
+  padding: 15px 5px; cursor: pointer; transition: 0.3s; position: relative; 
+}
+.tab-btn:hover { color: #fff; }
+.tab-btn.active { color: var(--blue); }
+.tab-btn.active::after { 
+  content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px; background: var(--blue); border-radius: 3px 3px 0 0; 
+}
+
+/* Tab 內容切換 */
+.tab-content { display: none; animation: fadeIn 0.3s ease; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* === [Tab 1] 課程地圖 (Curriculum) === */
+.section-title { font-size: 18px; font-weight: bold; margin: 30px 0 15px 0; display: flex; align-items: center; gap: 10px; }
+.st-level1 { color: var(--green); }
+.st-level2 { color: var(--green); }
+.st-level3 { color: var(--green); }
+
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+.course-card { 
+  background: var(--card-bg); border-radius: 12px; padding: 25px 20px 20px; border: 1px solid var(--border); 
+  display: flex; flex-direction: column; position: relative; transition: 0.2s; cursor: pointer;
+}
+.course-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-color: #475569; }
+
+.c-icon { font-size: 45px; color: var(--blue); text-align: center; margin: 20px 0 30px 0; }
+.c-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 10px; }
+.c-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-top: auto; }
+
+.badge { position: absolute; top: 15px; right: 15px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #000; }
+.bg-passed { background: var(--badge-green); color: #fff;}
+.bg-progress { background: var(--badge-orange); }
+.bg-locked { background: var(--badge-gray); color: #fff; }
+.c-locked-text { color: var(--text-muted); font-size: 12px; text-align: right; }
+
+/* === [Tab 2] 技能護照 (Skill Passport) === */
+.skill-layout { display: grid; grid-template-columns: 320px 1fr; gap: 25px; }
+.panel-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.radar-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;}
+.radar-title { font-size: 18px; font-weight: bold; margin-bottom: 35px; color: #fff; }
+.radar-circle { width: 170px; height: 170px; border-radius: 50%; border: 3px dashed #334155; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; background: radial-gradient(circle, rgba(56,189,248,0.05), transparent 70%); box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+.radar-level { font-size: 42px; font-weight: 900; color: var(--blue); text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+.radar-sub { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+.cert-title { font-size: 18px; font-weight: bold; margin-bottom: 25px; color: #fff; }
+.cert-table { width: 100%; border-collapse: collapse; text-align: left; }
+.cert-table th { color: var(--text-muted); font-size: 12px; font-weight: bold; padding: 0 10px 15px 10px; border-bottom: 1px solid var(--border); letter-spacing: 0.5px; text-transform: uppercase; }
+.cert-table td { padding: 18px 10px; border-bottom: 1px solid rgba(51, 65, 85, 0.5); font-size: 14px; transition: 0.2s; }
+.cert-table tr:hover td { background: rgba(56, 189, 248, 0.03); }
+.cert-table tr:last-child td { border-bottom: none; }
+.t-type { color: var(--text-muted); }
+.t-name { color: var(--blue); font-weight: bold; font-size: 15px; }
+.t-date { color: var(--text-muted); font-size: 13px; }
+.l-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-right: 6px; }
+.l-active { background: rgba(56, 189, 248, 0.15); color: var(--blue); border: 1px solid var(--blue); box-shadow: 0 0 8px rgba(56, 189, 248, 0.2); }
+.l-inactive { background: transparent; color: #64748b; border: 1px solid #475569; }
+
+/* === [Tab 3] OJT 電子簽核 === */
+.filter-bar { margin-bottom: 20px; }
+.select-filter { background: var(--card-bg); color: #fff; border: 1px solid var(--border); padding: 10px 15px; border-radius: 8px; font-size: 14px; outline: none; cursor: pointer;}
+.ojt-list { display: flex; flex-direction: column; gap: 15px; }
+.ojt-row { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;}
+.ojt-row:hover { border-color: #475569; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+.ojt-info { display: flex; flex-direction: column; gap: 8px; }
+.ojt-title { font-size: 16px; font-weight: bold; color: #fff; }
+.ojt-meta { font-size: 13px; color: var(--text-muted); }
+.ojt-title.disabled { color: var(--text-muted); text-decoration: line-through; opacity: 0.8;}
+.btn-sign { background: var(--blue); color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
+.btn-sign:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(56, 189, 248, 0.3); }
+.btn-archived { background: var(--panel); color: var(--text-muted); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: not-allowed; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header-area">
+  <div class="title-group">
+    <h1 class="page-title">E Learning</h1>
+    <p class="page-subtitle">培訓地圖、技能護照與 OJT 電子簽核系統</p>
+  </div>
+  
+  <div class="action-group">
+    <div class="user-profile">
+      <div class="avatar">S</div>
+      <div class="user-info">
+        <span class="user-name">Soma Chueh</span>
+        <span class="user-role">Technical Manager (L3)</span>
+      </div>
+    </div>
+    
+    <button class="btn-back-main" onclick="location.href='index.html'">
+      <i class="fa-solid fa-xmark"></i> 關閉返回
+    </button>
+  </div>
+</div>
+
+<div class="tabs-container">
+  <button class="tab-btn active" onclick="switchTab('curriculum', this)">課程地圖 (Curriculum)</button>
+  <button class="tab-btn" onclick="switchTab('passport', this)">技能護照 (Skill Passport)</button>
+  <button class="tab-btn" onclick="switchTab('ojt', this)">OJT 電子簽核</button>
+</div>
+
+<div id="curriculum" class="tab-content active">
+  <div class="section-title st-level1"><i class="fa-solid fa-seedling"></i> Level 1 - 基礎概論 (New Hire)</div>
+  <div class="course-grid">
+    <div class="course-card">
+      <div class="badge bg-passed">Passed</div>
+      <div class="c-icon"><i class="fa-solid fa-microchip"></i></div>
+      <div class="c-title">半導體設備基礎原理</div>
+      <div class="c-meta"><span>Video • 45m</span><span>Score: 95</span></div>
+    </div>
+    <div class="course-card">
+      <div class="badge bg-passed">Passed</div>
+      <div class="c-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="c-title">ESH 廠務工安規範</div>
+      <div class="c-meta"><span>Quiz • 20Q</span><span>Score: 100</span></div>
+    </div>
+    <div class="course-card">
+      <div class="badge bg-passed">Passed</div>
+      <div class="c-icon"><i class="fa-solid fa-toolbox"></i></div>
+      <div class="c-title">Hand Tools 正確使用規範</div>
+      <div class="c-meta"><span>Video • 20m</span><span>Score: 90</span></div>
+    </div>
+  </div>
+
+  <div class="section-title st-level2" style="margin-top: 40px;"><i class="fa-solid fa-screwdriver-wrench"></i> Level 2 - 保養與維護 (PM)</div>
+  <div class="course-grid">
+    <div class="course-card">
+      <div class="badge bg-passed">Passed</div>
+      <div class="c-icon"><i class="fa-solid fa-robot"></i></div>
+      <div class="c-title">Endura Robot PM SOP</div>
+      <div class="c-meta"><span>Video • 30m</span><span>Score: 92</span></div>
+    </div>
+    <div class="course-card">
+      <div class="badge bg-passed">Passed</div>
+      <div class="c-icon"><i class="fa-regular fa-snowflake"></i></div>
+      <div class="c-title">Cryo Pump Regeneration</div>
+      <div class="c-meta"><span>OJT • 2hr</span><span>Score: 88</span></div>
+    </div>
+    <div class="course-card">
+      <div class="badge bg-passed">Passed</div>
+      <div class="c-icon"><i class="fa-solid fa-vial"></i></div>
+      <div class="c-title">Leak Check 標準流程</div>
+      <div class="c-meta"><span>OJT • 1hr</span><span>Score: 95</span></div>
+    </div>
+  </div>
+
+  <div class="section-title st-level3" style="margin-top: 40px;"><i class="fa-solid fa-microscope"></i> Level 3 - 故障排除與進階 (Troubleshooting)</div>
+  <div class="course-grid">
+    <div class="course-card">
+      <div class="badge bg-progress">In Progress</div>
+      <div class="c-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="c-title">Advanced PVD Troubleshooting</div>
+      <div class="c-meta"><span>Video • 60m</span><span>Pending</span></div>
+    </div>
+    <div class="course-card">
+      <div class="badge bg-locked"><i class="fa-solid fa-lock"></i> Locked</div>
+      <div class="c-icon" style="color: var(--badge-gray);"><i class="fa-solid fa-wave-square"></i></div>
+      <div class="c-title">RF System & Match Tuning</div>
+      <div class="c-meta"><span>OJT • 3hr</span><span class="c-locked-text">Prerequisite: Advanced PVD</span></div>
+    </div>
+    <div class="course-card">
+      <div class="badge bg-locked"><i class="fa-solid fa-lock"></i> Locked</div>
+      <div class="c-icon" style="color: var(--badge-gray);"><i class="fa-solid fa-crosshairs"></i></div>
+      <div class="c-title">Robot Calibration & Teaching</div>
+      <div class="c-meta"><span>OJT • 4hr</span><span class="c-locked-text">Prerequisite: Level 2</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="passport" class="tab-content">
+  <div class="skill-layout">
+    <div class="panel-box radar-box">
+      <div class="radar-title">My Skill Radar</div>
+      <div class="radar-circle">
+        <span class="radar-level">L3</span>
+      </div>
+      <div class="radar-sub">Next Goal: Level 4<br>(Professional expert)</div>
+    </div>
+    <div class="panel-box">
+      <div class="cert-title">機台認證狀態 (Equipment Certification)</div>
+      <table class="cert-table">
+        <thead>
+          <tr>
+            <th>TOOL TYPE</th>
+            <th>TOOL NAME</th>
+            <th>CERTIFICATION LEVEL</th>
+            <th>EXPIRY DATE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="t-type">FSM PVD</td>
+            <td class="t-name">Endura</td>
+            <td>
+              <span class="l-badge l-active">L1</span>
+              <span class="l-badge l-active">L2</span>
+              <span class="l-badge l-active">L3</span>
+              <span class="l-badge l-inactive">L4</span>
+            </td>
+            <td class="t-date">2026/12/31</td>
+          </tr>
+          <tr>
+            <td class="t-type">PECVD</td>
+            <td class="t-name">Producer</td>
+            <td>
+              <span class="l-badge l-active">L1</span>
+              <span class="l-badge l-active">L2</span>
+              <span class="l-badge l-active">L3</span>
+              <span class="l-badge l-inactive">L4</span>
+            </td>
+            <td class="t-date">2026/06/30</td>
+          </tr>
+          <tr>
+            <td class="t-type">RTP</td>
+            <td class="t-name">RAPID 200</td>
+            <td>
+              <span class="l-badge l-active">L1</span>
+              <span class="l-badge l-active">L2</span>
+              <span class="l-badge l-inactive">L3</span>
+              <span class="l-badge l-inactive">L4</span>
+            </td>
+            <td class="t-date">--</td>
+          </tr>
+          <tr>
+            <td class="t-type">Grinding</td>
+            <td class="t-name">DFG8540</td>
+            <td>
+              <span class="l-badge l-active">L1</span>
+              <span class="l-badge l-active">L2</span>
+              <span class="l-badge l-inactive">L3</span>
+              <span class="l-badge l-inactive">L4</span>
+            </td>
+            <td class="t-date">--</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="ojt" class="tab-content">
+  <div class="filter-bar">
+    <select class="select-filter">
+      <option value="pending">待簽核 (Pending)</option>
+      <option value="all">全部紀錄 (All)</option>
+    </select>
+  </div>
+  <div class="ojt-list">
+    <div class="ojt-row">
+      <div class="ojt-info">
+        <div class="ojt-title">Endura Robot Blade Replacement (OJT)</div>
+        <div class="ojt-meta">申請人: Soma Chueh | 導師: Alex Chen | 申請日期: 2026/01/26</div>
+      </div>
+      <button class="btn-sign"><i class="fa-solid fa-qrcode"></i> 產生簽核碼</button>
+    </div>
+    <div class="ojt-row">
+      <div class="ojt-info">
+        <div class="ojt-title disabled">Basic Tool Operation</div>
+        <div class="ojt-meta">狀態: 已通過 | 簽核日期: 2025/12/20</div>
+      </div>
+      <button class="btn-archived">已存檔</button>
+    </div>
+    <div class="ojt-row">
+      <div class="ojt-info">
+        <div class="ojt-title disabled">Safety Protocols (LOTO)</div>
+        <div class="ojt-meta">狀態: 已通過 | 簽核日期: 2025/11/15</div>
+      </div>
+      <button class="btn-archived">已存檔</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// === 標籤切換邏輯 (Tab Switch) ===
+function switchTab(tabId, btnElement) {
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.remove('active');
+  });
+  
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  document.getElementById(tabId).classList.add('active');
+  btnElement.classList.add('active');
+}
+</script>
+
+</body>
+</html>
